@@ -1,0 +1,100 @@
+.search-dialog .ant-modal-content {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.search-dialog .ant-modal-header {
+  border-bottom: 1px solid #f0f0f0;
+  background: #fff;
+}
+
+.search-dialog-title {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.search-dialog .ant-modal-body {
+  padding: 24px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* 标签页样式 */
+.search-tabs {
+  margin-bottom: 16px;
+}
+
+/* 搜索输入区域 */
+.search-input-container {
+  margin-bottom: 16px;
+}
+
+/* 选项分组 */
+.search-option-group {
+  background-color: #fafafa;
+  border-radius: 2px;
+  padding: 12px;
+  margin-bottom: 16px;
+  border: 1px solid #f0f0f0;
+}
+
+.option-label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* 向量搜索样式 */
+.vector-switch-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.vector-switch {
+  margin-right: 8px;
+}
+
+.threshold-slider-container {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.threshold-slider {
+  margin: 12px 0;
+}
+
+/* 搜索按钮 */
+.search-button-container {
+  margin-top: 16px;
+}
+
+/* 搜索结果区域 */
+.search-results {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.search-results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.search-results-header h4 {
+  margin: 0;
+}
+
+.result-count {
+  color: #1890ff;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .vector-options .ant-col {
+    margin-bottom: 12px;
+  }
+}

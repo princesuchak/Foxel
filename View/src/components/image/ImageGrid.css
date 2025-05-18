@@ -1,0 +1,270 @@
+.image-grid {
+  margin-bottom: 40px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-gap: 24px;
+}
+
+/* 现代化卡片样式 */
+.custom-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  transition: all 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+  height: 100%;
+  background: #ffffff;
+  transform: translateY(0);
+  cursor: pointer;
+  aspect-ratio: 1 / 1;
+}
+
+.custom-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 28px rgba(0,0,0,0.15);
+}
+
+/* 图片占满卡片 */
+.custom-card-cover {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.custom-card-thumbnail {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+  display: block;
+}
+
+.custom-card:hover .custom-card-thumbnail {
+  transform: scale(1.05);
+}
+
+/* 信息覆盖层 - 默认隐藏 */
+.custom-card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 50%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 20px;
+  color: white;
+}
+
+.custom-card:hover .custom-card-overlay {
+  opacity: 1;
+}
+
+/* 信息内容样式 */
+.custom-card-info {
+  transform: translateY(20px);
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  opacity: 0;
+}
+
+.custom-card:hover .custom-card-info {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.custom-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 8px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.custom-card-tags-container {
+  margin-top: 6px;
+  margin-bottom: 10px;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.image-tag {
+  margin-right: 6px;
+  font-size: 11px !important;
+  background: rgba(255,255,255,0.2);
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: #ffffff;
+  display: inline-block;
+  margin-bottom: 4px;
+  backdrop-filter: blur(4px);
+}
+
+/* 权限和元数据指示器 */
+.custom-card-indicators {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 12px;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  z-index: 2;
+}
+
+.custom-card:hover .custom-card-indicators {
+  opacity: 1;
+}
+
+.custom-card-permission {
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  border-radius: 20px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.custom-card-metadata {
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  border-radius: 20px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  backdrop-filter: blur(4px);
+}
+
+/* 操作按钮容器 */
+.custom-card-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.custom-card-action-item {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  backdrop-filter: blur(4px);
+}
+
+.custom-card-action-item:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+/* 右键菜单样式 */
+.context-menu {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  padding: 8px 0;
+  min-width: 160px;
+  z-index: 1000;
+}
+
+.context-menu-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s;
+}
+
+.context-menu-item:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* 选中状态样式 */
+.custom-card-selected {
+  box-shadow: 0 0 0 3px #1890ff, 0 14px 28px rgba(0,0,0,0.15) !important;
+}
+
+.custom-card-selected::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: #1890ff;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.custom-card-selected::after {
+  content: '✓';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 22px;
+  height: 22px;
+  z-index: 6;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.image-grid-pagination {
+  margin-top: 40px;
+  text-align: center;
+}
+
+/* 移除旧的加载动画，不再需要 */
+.image-loading-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.image-loading-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .image-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-gap: 16px;
+  }
+}
