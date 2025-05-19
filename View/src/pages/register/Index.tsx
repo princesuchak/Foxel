@@ -13,16 +13,24 @@ const Register: React.FC = () => {
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    // 处理可能的OAuth回调
-    if (handleOAuthCallback()) {
-      message.success('使用GitHub账号注册成功！');
-      navigate('/');
-      return;
-    }
+    const checkOAuthCallback = async () => {
+      try {
+        if (await handleOAuthCallback()) {
+          message.success('使用GitHub账号注册成功！');
+          navigate('/');
+          return;
+        }
 
-    if (isAuthenticated()) {
-      navigate('/');
-    }
+        if (isAuthenticated()) {
+          navigate('/');
+        }
+      } catch (error) {
+        console.error('处理登录回调失败:', error);
+        message.error('登录过程中出现错误');
+      }
+    };
+    
+    checkOAuthCallback();
   }, [navigate]);
 
   const onFinish = async (values: any) => {

@@ -1,17 +1,14 @@
-using System.Security.Claims;
 using Foxel.Models;
 using Foxel.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Foxel.Models.Request.Auth;
 using Foxel.Models.Response.Auth;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Foxel.Controllers;
 
 [Route("api/auth")]
-public class AuthController(IUserService userService) : BaseApiController
+public class AuthController(IUserService userService, IConfigService configService) : BaseApiController
 {
     [HttpPost("register")]
     public async Task<ActionResult<BaseResult<AuthResponse>>> Register([FromBody] RegisterRequest request)
@@ -101,73 +98,110 @@ public class AuthController(IUserService userService) : BaseApiController
     }
 
     [HttpGet("github/login")]
-    public IActionResult GitHubLogin(string returnUrl = "/")
+    public IActionResult GitHubLogin()
     {
-        try
-        {
-            var properties = new AuthenticationProperties
-            { 
-                RedirectUri = Url.Action("GitHubCallback", new { returnUrl }),
-                Items = { { "returnUrl", returnUrl } },
-                // 添加超时设置
-                AllowRefresh = true,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(10),
-                IsPersistent = false
-            };
-            return Challenge(properties, "GitHub");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"GitHub登录异常: {ex}");
-            return Redirect("/login?error=github_login_error");
-        }
+        string githubClientId = configService["Authentication:GitHubClientId"];
+        string githubCallback = configService["Authentication:GitHubRedirectUri"];
+        string githubAuthorizeUrl =
+            $"https://github.com/login/oauth/authorize?client_id={Uri.EscapeDataString(githubClientId)}&redirect_uri={Uri.EscapeDataString(githubCallback)}";
+        return Redirect(githubAuthorizeUrl);
     }
 
     [HttpGet("github/callback")]
-    public async Task<IActionResult> GitHubCallback(string returnUrl = "/")
+    public async Task<ActionResult<BaseResult<string>>> GitHubCallback(string code)
     {
-        try
+        if (string.IsNullOrEmpty(code))
         {
-            var authenticateResult = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            if (!authenticateResult.Succeeded)
-            {
-                Console.WriteLine("GitHub认证失败: 无法获取认证结果");
-                return Redirect("/login?error=github_auth_failed");
-            }
-            // 获取GitHub用户信息
-            var githubId = authenticateResult.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var githubLogin = authenticateResult.Principal.FindFirst("urn:github:login")?.Value;
-            var githubEmail = authenticateResult.Principal.FindFirst(ClaimTypes.Email)?.Value;
-
-            Console.WriteLine($"GitHub用户信息: ID={githubId}, Login={githubLogin}, Email={githubEmail}");
-
-            if (string.IsNullOrEmpty(githubId) || string.IsNullOrEmpty(githubLogin))
-            {
-                return Redirect("/login?error=github_missing_info");
-            }
-
-            // 登出Cookie认证会话
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-            // 查找或创建用户
-            var (success, message, user) = await userService.FindOrCreateGitHubUserAsync(
-                githubId, githubLogin, githubEmail);
-            
-            if (!success || user == null)
-            {
-                return Redirect($"/login?error={Uri.EscapeDataString(message)}");
-            }
-
-            // 生成JWT令牌
-            var token = await userService.GenerateJwtTokenAsync(user);
-            
-            // 重定向回前端，携带token参数
-            return Redirect($"{returnUrl}?token={Uri.EscapeDataString(token)}");
+            return Error<string>("GitHub授权码无效");
         }
-        catch (Exception ex)
+
+        string githubClientId = configService["Authentication:GitHubClientId"];
+        string githubClientSecret = configService["Authentication:GitHubClientSecret"];
+        string githubTokenUrl = "https://github.com/login/oauth/access_token";
+        string githubUserApiUrl = "https://api.github.com/user";
+
+        using var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Add("User-Agent", "Foxel");
+        httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+        var tokenRequestUrl =
+            $"{githubTokenUrl}?client_id={Uri.EscapeDataString(githubClientId)}&client_secret={Uri.EscapeDataString(githubClientSecret)}&code={Uri.EscapeDataString(code)}";
+        var tokenResponse = await httpClient.PostAsync(tokenRequestUrl, null);
+
+        if (!tokenResponse.IsSuccessStatusCode)
         {
-            Console.WriteLine($"GitHub回调处理异常: {ex}");
-            return Redirect("/login?error=github_callback_error");
+            var errorContent = await tokenResponse.Content.ReadAsStringAsync();
+            Console.WriteLine($"获取GitHub访问令牌失败: {tokenResponse.StatusCode}, {errorContent}");
+            return Error<string>($"获取GitHub访问令牌失败: {errorContent}", (int)tokenResponse.StatusCode);
         }
+
+        var tokenResponseContent = await tokenResponse.Content.ReadAsStringAsync();
+        var tokenJson = System.Text.Json.JsonDocument.Parse(tokenResponseContent);
+
+        if (!tokenJson.RootElement.TryGetProperty("access_token", out var accessTokenElement) ||
+            accessTokenElement.GetString() == null)
+        {
+            Console.WriteLine($"GitHub响应中未找到access_token: {tokenResponseContent}");
+            return Error<string>("获取GitHub访问令牌失败，响应中未包含令牌。");
+        }
+
+        var accessToken = accessTokenElement.GetString();
+
+        httpClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+
+        var userResponse = await httpClient.GetAsync(githubUserApiUrl);
+        if (!userResponse.IsSuccessStatusCode)
+        {
+            var errorContent = await userResponse.Content.ReadAsStringAsync();
+            Console.WriteLine($"获取GitHub用户信息失败: {userResponse.StatusCode}, {errorContent}");
+            return Error<string>($"获取GitHub用户信息失败: {errorContent}", (int)userResponse.StatusCode);
+        }
+
+        var userContent = await userResponse.Content.ReadAsStringAsync();
+        var userJson = System.Text.Json.JsonDocument.Parse(userContent);
+
+        string? githubUserId = null;
+        string? email = null;
+        string? name = null;
+        string? loginName = null;
+
+        if (userJson.RootElement.TryGetProperty("id", out var idElement))
+        {
+            githubUserId = idElement.GetInt64().ToString();
+        }
+
+        if (userJson.RootElement.TryGetProperty("email", out var emailElement))
+        {
+            email = emailElement.GetString();
+        }
+
+        if (userJson.RootElement.TryGetProperty("name", out var nameElement))
+        {
+            name = nameElement.GetString();
+        }
+
+        if (userJson.RootElement.TryGetProperty("login", out var loginElement))
+        {
+            loginName = loginElement.GetString();
+        }
+
+        if (string.IsNullOrEmpty(githubUserId))
+        {
+            return Error<string>("无法从GitHub获取用户ID");
+        }
+
+
+        var (isSuccess, message, user) =
+            await userService.FindOrCreateGitHubUserAsync(githubUserId, name ?? loginName, email);
+
+        if (!isSuccess || user == null)
+        {
+            Console.WriteLine($"创建或查找GitHub用户失败: {message}");
+            return Redirect(
+                $"/login?error=github_user_creation_failed&message={Uri.EscapeDataString(message)}");
+        }
+
+        var token = await userService.GenerateJwtTokenAsync(user);
+        return Redirect($"/login?token={Uri.EscapeDataString(token)}");
     }
 }

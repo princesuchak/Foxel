@@ -138,12 +138,14 @@ const SystemConfig: React.FC = () => {
               groupName="Authentication"
               configs={{
                 "GitHubClientId": configs.Authentication?.["GitHubClientId"] || '',
-                "GitHubClientSecret": configs.Authentication?.["GitHubClientSecret"] || ''
+                "GitHubClientSecret": configs.Authentication?.["GitHubClientSecret"] || '',
+                "GitHubCallbackUrl": configs.Authentication?.["GitHubCallbackUrl"] || ''
               }}
               onSave={(_group, key, value) => handleSaveConfig('Authentication', key, value)}
               descriptions={{
                 "GitHubClientId": 'GitHub OAuth 应用客户端ID',
-                "GitHubClientSecret": 'GitHub OAuth 应用客户端密钥'
+                "GitHubClientSecret": 'GitHub OAuth 应用客户端密钥',
+                "GitHubCallbackUrl": 'GitHub OAuth 认证回调地址'
               }}
             />
           </TabPane>

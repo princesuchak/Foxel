@@ -97,7 +97,7 @@ public class UserService(IDbContextFactory<MyDbContext> dbContextFactory, IConfi
     }
 
     public async Task<(bool success, string message, User? user)> FindOrCreateGitHubUserAsync(
-        string githubId, string githubLogin, string? email)
+        string githubId, string? githubName, string? email)
     {
         if (string.IsNullOrEmpty(email))
         {
@@ -106,17 +106,15 @@ public class UserService(IDbContextFactory<MyDbContext> dbContextFactory, IConfi
 
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        // 先尝试通过邮箱查找用户
         var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
         if (user == null)
         {
-            // 用户不存在，创建新用户
             user = new User
             {
-                UserName = $"{githubLogin}_{githubId.Substring(0, 5)}", // 创建唯一用户名
+                UserName = $"{githubName}",
                 Email = email,
-                PasswordHash = HashPassword(Guid.NewGuid().ToString()), 
+                PasswordHash = HashPassword(Guid.NewGuid().ToString()),
                 GithubId = githubId,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -125,15 +123,14 @@ public class UserService(IDbContextFactory<MyDbContext> dbContextFactory, IConfi
             await context.SaveChangesAsync();
             return (true, "GitHub用户注册成功", user);
         }
-        else
+
+        if (string.IsNullOrEmpty(user.GithubId))
         {
-            if (string.IsNullOrEmpty(user.GithubId))
-            {
-                user.GithubId = githubId;
-                user.UpdatedAt = DateTime.UtcNow;
-                await context.SaveChangesAsync();
-            }
-            return (true, "GitHub用户登录成功", user);
+            user.GithubId = githubId;
+            user.UpdatedAt = DateTime.UtcNow;
+            await context.SaveChangesAsync();
         }
+
+        return (true, "GitHub用户登录成功", user);
     }
 }

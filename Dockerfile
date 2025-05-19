@@ -1,6 +1,7 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
 EXPOSE 8080  
+EXPOSE 8081
 EXPOSE 80    
 
 FROM oven/bun:alpine AS build-frontend
@@ -31,8 +32,8 @@ RUN apt-get update && apt-get install -y nginx && rm -rf /var/lib/apt/lists/*
 COPY --from=build-frontend /src/View/dist /var/www/html
 COPY /View/nginx.conf /etc/nginx/nginx.conf
 
-RUN mkdir -p /var/lib/nginx/body /var/cache/nginx /var/run/nginx \
-    && chown -R $APP_UID:$APP_UID /var/lib/nginx /var/cache/nginx /var/run/nginx /var/log/nginx /etc/nginx /var/www/html \
+RUN mkdir -p /var/lib/nginx/body /var/cache/nginx /var/run/nginx /app/Uploads \
+    && chown -R $APP_UID:$APP_UID /var/lib/nginx /var/cache/nginx /var/run/nginx /var/log/nginx /etc/nginx /var/www/html /app/Uploads \
     && mkdir -p /run \
     && chmod 777 /run
 

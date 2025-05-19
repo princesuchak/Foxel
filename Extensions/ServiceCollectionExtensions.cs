@@ -67,35 +67,6 @@ public static class ServiceCollectionExtensions
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(configuration["Jwt:SecretKey"]))
                 };
-            })
-            .AddCookie(options =>
-            {
-                options.Cookie.HttpOnly = true;
-                options.Cookie.SameSite = SameSiteMode.Lax;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-            })
-            .AddGitHub(options =>
-            {
-                options.ClientId = configuration["Authentication:GitHubClientId"];
-                options.ClientSecret = configuration["Authentication:GitHubClientSecret"];
-                options.CallbackPath = "/api/auth/github/callback";
-                options.Scope.Add("user:email");
-                options.BackchannelHttpHandler = new HttpClientHandler
-                {
-                    UseCookies = false,
-                    AllowAutoRedirect = false,
-                    MaxConnectionsPerServer = 100
-                };
-                options.Events = new Microsoft.AspNetCore.Authentication.OAuth.OAuthEvents
-                {
-                    OnRemoteFailure = context =>
-                    {
-                        Console.WriteLine($"GitHub登录失败: {context.Failure}");
-                        context.Response.Redirect("/login?error=github_remote_error");
-                        context.HandleResponse();
-                        return Task.CompletedTask;
-                    }
-                };
             });
     }
 

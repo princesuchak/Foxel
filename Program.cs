@@ -1,5 +1,6 @@
 using Foxel.Extensions;
 using Foxel.Services.Interface;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 var environment = builder.Environment;
@@ -14,26 +15,30 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddApplicationAuthentication();
 builder.Services.AddApplicationAuthorization();
 builder.Services.AddApplicationCors();
-
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 var app = builder.Build();
 
-// 初始化数据库配置
 using (var scope = app.Services.CreateScope())
 {
     var initializer = scope.ServiceProvider.GetRequiredService<IDatabaseInitializer>();
     await initializer.InitializeAsync();
 }
-
+app.UseForwardedHeaders();
 app.UseApplicationStaticFiles();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
-app.UseHttpsRedirection();
 app.UseApplicationOpenApi();
 app.UseCors("MyAllowSpecificOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.UseHttpsRedirection();
 app.Run();

@@ -11,5 +11,5 @@ public interface IUserService
     Task<string> GenerateJwtTokenAsync(User user);
     Task<User?> GetUserByIdAsync(int userId);
     Task<(bool success, string message, User? user)> FindOrCreateGitHubUserAsync(
-        string githubId, string githubLogin, string? email);
+        string githubId, string? githubName, string? email);
 }

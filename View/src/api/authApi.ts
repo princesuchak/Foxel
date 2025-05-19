@@ -1,5 +1,5 @@
-import { type BaseResult, type AuthResponse, type LoginRequest, type RegisterRequest, type UserProfile } from './types';
-import { fetchApi, BASE_URL } from './fetchClient';
+import {type BaseResult, type AuthResponse, type LoginRequest, type RegisterRequest, type UserProfile} from './types';
+import {fetchApi, BASE_URL} from './fetchClient';
 
 // 认证数据本地存储键
 const TOKEN_KEY = 'token';
@@ -19,13 +19,13 @@ export async function login(data: LoginRequest): Promise<BaseResult<AuthResponse
         method: 'POST',
         body: JSON.stringify(data),
     });
-    
+
     if (response.success && response.data) {
         clearAuthData(); // 清除旧的认证数据
         console.log('登录成功，保存认证数据:', response.data);
         saveAuthData(response.data); // 保存新的认证数据
     }
-    
+
     return response;
 }
 
@@ -96,7 +96,7 @@ export const getToken = (): string | null => {
 };
 
 // 处理GitHub OAuth回调，接收token并保存
-export function handleOAuthCallback(): boolean {
+export async function handleOAuthCallback(): Promise<boolean> {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
     const error = urlParams.get('error');
@@ -104,52 +104,40 @@ export function handleOAuthCallback(): boolean {
     if (error) return false;
 
     if (token) {
-        const githubUser = parseJwt(token);
-        if (githubUser) {
-            // 保存token
-            localStorage.setItem('token', token);
-
-            // 保存用户信息
-            if (githubUser.unique_name && githubUser.email) {
-                const user: UserProfile = {
-                    id: parseInt(githubUser.nameid),
-                    userName: githubUser.unique_name,
-                    email: githubUser.email,
-                    roleName: ''
+        try {
+            // 保存临时token，用于API调用
+            localStorage.setItem(TOKEN_KEY, token);
+            
+            // 获取完整的用户信息
+            const userResponse = await getCurrentUser();
+            
+            if (userResponse.success && userResponse.data) {
+                // 构造完整的认证响应并保存
+                const authResponse: AuthResponse = {
+                    token: token,
+                    user: userResponse.data
                 };
-                localStorage.setItem('user', JSON.stringify(user));
+                
+                saveAuthData(authResponse);
+                
+                // 清除URL中的token参数
+                const url = new URL(window.location.href);
+                url.searchParams.delete('token');
+                window.history.replaceState({}, document.title, url.toString());
+                
+                return true;
             }
-
-            // 清除URL中的token参数
-            const url = new URL(window.location.href);
-            url.searchParams.delete('token');
-            window.history.replaceState({}, document.title, url.toString());
-
-            return true;
+            return false;
+        } catch (error) {
+            console.error('第三方登录处理失败:', error);
+            clearAuthData(); // 清除可能部分保存的数据
+            return false;
         }
     }
 
     return false;
 }
 
-// 解析JWT获取用户信息
-function parseJwt(token: string) {
-    try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(
-            atob(base64)
-                .split('')
-                .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-                .join('')
-        );
-        return JSON.parse(jsonPayload);
-    } catch {
-        return null;
-    }
-}
-
-// 获取GitHub登录URL
 export function getGitHubLoginUrl(): string {
-    return `${BASE_URL}/auth/github/login?returnUrl=${window.location.origin}/api/auth/github/callback`;
+    return `${BASE_URL}/auth/github/login`;
 }
