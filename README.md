@@ -9,9 +9,13 @@
     <a href="#-贡献指南"><img src="https://img.shields.io/badge/贡献-Contribute-brightgreen?style=for-the-badge" alt="贡献"></a>
 </p>
 
-<p style="text-align: center;">
+<p>
     <strong>Foxel</strong> 是一个基于 <strong>.NET 9</strong> 开发的现代化智能图像检索与管理系统，集成先进的 <strong>AI 视觉模型</strong> 和 <strong>向量嵌入技术</strong>，提供高效的图像搜索与管理功能。
 </p>
+
+> 🖥️ **在线演示：**  
+> 访问 [https://foxel.cc](https://foxel.cc) 体验 Foxel 部分功能。  
+> ⚠️ **注意：演示环境数据可能不定期清理，请勿存放重要信息。**
 
 ---
 
