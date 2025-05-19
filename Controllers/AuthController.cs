@@ -101,7 +101,7 @@ public class AuthController(IUserService userService, IConfigService configServi
     public IActionResult GitHubLogin()
     {
         string githubClientId = configService["Authentication:GitHubClientId"];
-        string githubCallback = configService["Authentication:GitHubRedirectUri"];
+        string githubCallback = configService["Authentication:GitHubCallbackUrl"];
         string githubAuthorizeUrl =
             $"https://github.com/login/oauth/authorize?client_id={Uri.EscapeDataString(githubClientId)}&redirect_uri={Uri.EscapeDataString(githubCallback)}";
         return Redirect(githubAuthorizeUrl);

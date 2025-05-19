@@ -52,8 +52,22 @@
 
    打开浏览器访问您的域名或者IP 即可使用 Foxel。
 
-> 如需自定义数据库等配置，可通过修改 `Dockerfile` 或挂载配置文件实现。
+4. **获取管理员账号信息**
 
+   容器启动后，可通过以下命令查看日志，获取管理员邮箱和初始密码：
+   ```bash
+   docker logs foxel
+   ```
+
+> ⚠️ **注意：**  
+> Foxel 依赖 PostgreSQL 数据库，并需要在数据库中启用 [vector 扩展](https://github.com/pgvector/pgvector)。  
+> 请确保您的 PostgreSQL 实例已正确安装并启用 `vector` 扩展，否则图像检索功能无法正常使用。  
+> 可通过如下命令在数据库中启用扩展：
+> ```sql
+> CREATE EXTENSION IF NOT EXISTS vector;
+> ```
+
+> 如需自定义数据库等配置，可通过修改 `Dockerfile` 或挂载配置文件实现。
 
 ---
 

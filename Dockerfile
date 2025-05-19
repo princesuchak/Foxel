@@ -26,6 +26,7 @@ RUN dotnet publish "./Foxel.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:U
 
 FROM base AS final
 WORKDIR /app
+# Format: Host=yourhost;Username=foxel;Password=foxel;Database=foxel
 ENV DEFAULT_CONNECTION="YourDefaultConnectionStringHere"
 COPY --from=publish /app/publish .
 RUN apt-get update && apt-get install -y nginx && rm -rf /var/lib/apt/lists/*
