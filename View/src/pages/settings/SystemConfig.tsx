@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Tabs, Card, message, Spin } from 'antd';
+import { Tabs, Card, message, Spin, Select } from 'antd';
+import { CloudOutlined, DatabaseOutlined } from '@ant-design/icons';
 import { getAllConfigs, setConfig } from '../../api';
 import ConfigGroup from './ConfigGroup.tsx';
 
 const { TabPane } = Tabs;
+const { Option } = Select;
 
 interface ConfigStructure {
   [key: string]: {
@@ -15,6 +17,7 @@ const SystemConfig: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [configs, setConfigs] = useState<ConfigStructure>({});
   const [activeKey, setActiveKey] = useState('AI');
+  const [storageType, setStorageType] = useState('Telegram');
 
   // 获取所有配置项
   const fetchConfigs = async () => {
@@ -32,6 +35,11 @@ const SystemConfig: React.FC = () => {
         });
 
         setConfigs(configGroups);
+        
+        // 设置初始存储类型
+        if (configGroups.Storage?.DefaultStorage) {
+          setStorageType(configGroups.Storage.DefaultStorage);
+        }
       } else {
         message.error('获取配置失败: ' + response.message);
       }
@@ -71,6 +79,13 @@ const SystemConfig: React.FC = () => {
       console.error(error);
     }
   };
+
+  // 存储类型选项
+  const storageOptions = [
+    { value: 'Telegram', label: 'Telegram存储', icon: <CloudOutlined style={{ color: '#0088cc' }} /> },
+    { value: 'Local', label: '本地存储', icon: <DatabaseOutlined style={{ color: '#52c41a' }} /> },
+    // 未来可以添加更多存储选项
+  ];
 
   useEffect(() => {
     fetchConfigs();
@@ -151,18 +166,60 @@ const SystemConfig: React.FC = () => {
           </TabPane>
 
           <TabPane tab="存储设置" key="Storage">
-            <ConfigGroup
-              groupName="Storage"
-              configs={{
-                "TelegramStorageBotToken": configs.Storage?.["TelegramStorageBotToken"] || '',
-                "TelegramStorageChatId": configs.Storage?.["TelegramStorageChatId"] || ''
-              }}
-              onSave={handleSaveConfig}
-              descriptions={{
-                "TelegramStorageBotToken": 'Telegram 机器人令牌',
-                "TelegramStorageChatId": 'Telegram 聊天ID'
-              }}
-            />
+            <div style={{ marginBottom: 20 }}>
+              <span style={{ marginRight: 8, display: 'inline-block', width: 100 }}>默认存储:</span>
+              <Select 
+                value={configs.Storage?.DefaultStorage || 'Telegram'} 
+                onChange={(value) => {
+                  handleSaveConfig('Storage', 'DefaultStorage', value);
+                }}
+                style={{ width: 200 }}
+              >
+                {storageOptions.map(option => (
+                  <Option key={option.value} value={option.value}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      {option.icon}
+                      <span style={{ marginLeft: 8 }}>{option.label}</span>
+                    </div>
+                  </Option>
+                ))}
+              </Select>
+            </div>
+            
+            <div style={{ marginBottom: 20 }}>
+              <span style={{ marginRight: 8, display: 'inline-block', width: 100 }}>配置存储:</span>
+              <Select 
+                value={storageType} 
+                onChange={(value) => {
+                  setStorageType(value);
+                }}
+                style={{ width: 200 }}
+              >
+                {storageOptions.map(option => (
+                  <Option key={option.value} value={option.value}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      {option.icon}
+                      <span style={{ marginLeft: 8 }}>{option.label}</span>
+                    </div>
+                  </Option>
+                ))}
+              </Select>
+            </div>
+
+            {storageType === 'Telegram' && (
+              <ConfigGroup
+                groupName="Storage"
+                configs={{
+                  "TelegramStorageBotToken": configs.Storage?.TelegramStorageBotToken || '',
+                  "TelegramStorageChatId": configs.Storage?.TelegramStorageChatId || ''
+                }}
+                onSave={handleSaveConfig}
+                descriptions={{
+                  "TelegramStorageBotToken": 'Telegram 机器人令牌',
+                  "TelegramStorageChatId": 'Telegram 聊天ID'
+                }}
+              />
+            )}
           </TabPane>
         </Tabs>
       )}

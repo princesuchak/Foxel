@@ -436,13 +436,24 @@ public class PictureService(
         int? userId,
         PermissionType permission = PermissionType.Public,
         int? albumId = null,
-        StorageType storageType = StorageType.Local)
+        StorageType? storageType = null)
     {
+        // 如果未指定存储类型，则从配置中获取默认存储类型
+        if (storageType == null)
+        {
+            var defaultStorageTypeStr = configuration["Storage:DefaultStorage"];
+            if (string.IsNullOrEmpty(defaultStorageTypeStr) || !Enum.TryParse<StorageType>(defaultStorageTypeStr, out var defaultStorageType))
+            {
+                defaultStorageType = StorageType.Local; // 如果配置中没有或解析失败，使用本地存储作为默认
+            }
+            storageType = defaultStorageType;
+        }
+
         string fileExtension = Path.GetExtension(fileName);
         string newFileName = $"{Guid.NewGuid()}{fileExtension}";
 
         // 获取对应的存储提供者
-        var storageProvider = storageProviderFactory.GetProvider(storageType);
+        var storageProvider = storageProviderFactory.GetProvider(storageType.Value);
 
         // 使用存储提供者保存文件
         string relativePath = await storageProvider.SaveAsync(fileStream, fileName, contentType);
@@ -493,7 +504,7 @@ public class PictureService(
             User = user,
             Permission = permission,
             AlbumId = albumId,
-            StorageType = storageType,
+            StorageType = storageType.Value,
             ProcessingStatus = isAnonymous ? ProcessingStatus.Completed : ProcessingStatus.Pending,
             ThumbnailPath = isAnonymous ? relativePath : null  
         };

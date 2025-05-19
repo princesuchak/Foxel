@@ -10,4 +10,6 @@ public class UploadPictureRequest
     public int? Permission { get; set; } = 1;
 
     public int? AlbumId { get; set; } = null;
+    
+    public StorageType? StorageType { get; set; } = null;
 }

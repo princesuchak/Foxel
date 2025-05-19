@@ -78,7 +78,8 @@ public class PictureController(IPictureService pictureService,IConfigService con
                 request.File.ContentType,
                 userId,
                 (PermissionType)request.Permission!,
-                request.AlbumId
+                request.AlbumId,
+                request.StorageType
             );
 
             var picture = result.Picture;

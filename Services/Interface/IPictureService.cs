@@ -32,7 +32,7 @@ public interface IPictureService
         int? userId, 
         PermissionType permission = PermissionType.Public, 
         int? albumId = null,
-        StorageType storageType = StorageType.Telegram
+        StorageType? storageType = null
         );
     
     Task<ExifInfo> GetPictureExifInfoAsync(int pictureId);
