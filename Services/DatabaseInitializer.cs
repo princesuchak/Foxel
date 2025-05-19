@@ -100,7 +100,7 @@ public class DatabaseInitializer(
             string password = GenerateRandomPassword(6);
             string passwordHash = HashPassword(password);
 
-            logger.LogInformation("创建管理员用户，用户名: Admin，密码: {Password}", password);
+            logger.LogInformation("创建管理员用户，邮箱: you@foxel.cc，密码: {Password}", password);
             adminUser = new User
             {
                 UserName = "Admin",
@@ -114,8 +114,8 @@ public class DatabaseInitializer(
 
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"[重要] 管理员账户初始密码: {password}，请及时修改");
+            Console.WriteLine($"[重要] 请及时登录后台修改AI相关配置，系统才可正常运行");
             Console.ResetColor();
-
             await context.SaveChangesAsync();
         }
     }
