@@ -16,7 +16,7 @@ public static class ApplicationBuilderExtensions
         app.UseStaticFiles(new StaticFileOptions
         {
             FileProvider = new PhysicalFileProvider(uploadsPath),
-            RequestPath = "/uploads"
+            RequestPath = "/Uploads"
         });
     }
 

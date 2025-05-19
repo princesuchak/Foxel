@@ -122,7 +122,7 @@ public sealed class BackgroundTaskQueue : IBackgroundTaskQueue, IDisposable
                 foreach (var picture in unfinishedPictures)
                 {
                     // 构建原始文件路径
-                    string relativePath = picture.Path.TrimStart('/').Replace("uploads", "Uploads");
+                    string relativePath = picture.Path.TrimStart('/');
                     string originalFilePath = Path.Combine(Directory.GetCurrentDirectory(), relativePath);
                     if (File.Exists(originalFilePath))
                     {
@@ -255,7 +255,7 @@ public sealed class BackgroundTaskQueue : IBackgroundTaskQueue, IDisposable
             {
                 // 本地存储缩略图
                 relativeThumbnailPath =
-                    $"/uploads/{Path.GetRelativePath("Uploads", Path.GetDirectoryName(thumbnailPath)!)}/{Path.GetFileName(thumbnailPath)}";
+                    $"/Uploads/{Path.GetRelativePath("Uploads", Path.GetDirectoryName(thumbnailPath)!)}/{Path.GetFileName(thumbnailPath)}";
                 picture.ThumbnailPath = relativeThumbnailPath.Replace('\\', '/');
             }
             else if (picture.StorageType == StorageType.Telegram)

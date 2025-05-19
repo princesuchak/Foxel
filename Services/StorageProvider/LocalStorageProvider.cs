@@ -30,8 +30,10 @@ public class LocalStorageProvider(IConfigService config) : IStorageProvider
         return Task.CompletedTask;
     }
 
-    public string GetUrl(string storagePath)
+    public string GetUrl(string? storagePath)
     {
+        if (string.IsNullOrEmpty(storagePath))
+            return $"/images/unavailable.gif";
         return $"{_serverUrl}{storagePath}";
     }
 
