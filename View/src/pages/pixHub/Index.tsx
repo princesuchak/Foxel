@@ -19,12 +19,14 @@ import {
 import ImageGrid from '../../components/image/ImageGrid';
 import type { PictureResponse } from '../../api/types';
 import { getFilteredTags } from '../../api/tagApi';
+import useIsMobile from '../../hooks/useIsMobile';
 
 const { Title, Text, Paragraph } = Typography;
 const { Search } = Input;
 const { Option } = Select;
 
 const PixHub: React.FC = () => {
+  const isMobile = useIsMobile();
   const [activeCategory, setActiveCategory] = useState('全部');
   const [sortBy, setSortBy] = useState('newest');
   const [searchQuery, setSearchQuery] = useState('');
@@ -84,28 +86,50 @@ const PixHub: React.FC = () => {
 
   return (
     <div className="image-square">
-      <div className="page-header" style={{ marginBottom: 32 }}>
-        <Row gutter={[24, 24]} align="middle">
+      <div className="page-header" style={{ marginBottom: isMobile ? 20 : 32 }}>
+        <Row gutter={[24, isMobile ? 12 : 24]} align="middle">
           <Col lg={10} md={12} sm={24} xs={24}>
-            <Title level={2} style={{ marginBottom: 8, fontWeight: 600 }}>
+            <Title level={2} style={{ 
+              marginBottom: 8, 
+              fontWeight: 600,
+              fontSize: isMobile ? 24 : 30,
+              textAlign: isMobile ? 'center' : 'left' 
+            }}>
               图片广场
-              <Text style={{ fontSize: 16, fontWeight: 400, marginLeft: 12, color: '#8c8c8c' }}>
+              {!isMobile && (
+                <Text style={{ fontSize: 16, fontWeight: 400, marginLeft: 12, color: '#8c8c8c' }}>
+                  探索世界各地的精彩瞬间
+                </Text>
+              )}
+            </Title>
+            {isMobile && (
+              <Text style={{ 
+                fontSize: 14, 
+                fontWeight: 400, 
+                color: '#8c8c8c',
+                display: 'block',
+                textAlign: 'center'
+              }}>
                 探索世界各地的精彩瞬间
               </Text>
-            </Title>
-            <Paragraph style={{ color: '#666666' }}>
+            )}
+            <Paragraph style={{ 
+              color: '#666666',
+              textAlign: isMobile ? 'center' : 'left',
+              marginBottom: isMobile ? 5 : 'inherit' 
+            }}>
               发现创作者分享的高质量摄影作品，获取灵感，找到你喜爱的风格
             </Paragraph>
           </Col>
 
           <Col lg={14} md={12} sm={24} xs={24}>
-            <Row gutter={[16, 16]} justify="end">
+            <Row gutter={[16, 16]} justify={isMobile ? "center" : "end"}>
               <Col lg={16} md={16} sm={16} xs={24}>
                 <Search
                   placeholder="搜索图片、标签或创作者"
                   allowClear
                   enterButton={<SearchOutlined />}
-                  size="large"
+                  size={isMobile ? "middle" : "large"}
                   onSearch={(value) => setSearchQuery(value)}
                   style={{ width: '100%' }}
                 />
@@ -113,7 +137,7 @@ const PixHub: React.FC = () => {
               <Col lg={8} md={8} sm={8} xs={24}>
                 <Select
                   style={{ width: '100%' }}
-                  size="large"
+                  size={isMobile ? "middle" : "large"}
                   value={sortBy}
                   onChange={(value) => setSortBy(value)}
                   suffixIcon={<FilterOutlined />}
@@ -128,18 +152,22 @@ const PixHub: React.FC = () => {
         </Row>
       </div>
 
-      <div className="category-nav" style={{ marginBottom: 28, overflowX: 'auto' }}>
-        <Space size={[12, 20]} wrap style={{ justifyContent: 'center' }}>
+      <div className="category-nav" style={{ 
+        marginBottom: isMobile ? 20 : 28, 
+        overflowX: 'auto',
+        paddingBottom: 8
+      }}>
+        <Space size={[isMobile ? 8 : 12, isMobile ? 10 : 20]} wrap style={{ justifyContent: 'center' }}>
           {categories.map(category => (
             <Button
               key={category}
               type={activeCategory === category ? "primary" : "default"}
               shape="round"
-              size="large"
+              size={isMobile ? "middle" : "large"}
               onClick={() => setActiveCategory(category)}
               style={{
                 fontWeight: 500,
-                minWidth: 80,
+                minWidth: isMobile ? 70 : 80,
                 boxShadow: activeCategory === category ? '0 4px 12px rgba(0,0,0,0.15)' : 'none',
               }}
               icon={category === '全部' ? <ThunderboltOutlined /> : null}
@@ -151,12 +179,12 @@ const PixHub: React.FC = () => {
         </Space>
       </div>
 
-      <Divider style={{ margin: '24px 0' }} />
+      <Divider style={{ margin: isMobile ? '16px 0' : '24px 0' }} />
 
-      <div className="results-info" style={{ marginBottom: 24 }}>
+      <div className="results-info" style={{ marginBottom: isMobile ? 16 : 24 }}>
         <Row justify="space-between" align="middle">
           <Col>
-            <Text style={{ fontSize: 15 }}>
+            <Text style={{ fontSize: isMobile ? 14 : 15 }}>
               找到 <strong>{totalCount}</strong> 张图片
               {activeCategory !== '全部' && <span> · {activeCategory}分类</span>}
               {searchQuery && <span> · 搜索"{searchQuery}"</span>}

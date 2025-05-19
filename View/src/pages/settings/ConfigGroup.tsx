@@ -11,13 +11,15 @@ interface ConfigGroupProps {
   descriptions: {
     [key: string]: string;
   };
+  isMobile?: boolean;
 }
 
 const ConfigGroup: React.FC<ConfigGroupProps> = ({
   groupName,
   configs,
   onSave,
-  descriptions
+  descriptions,
+  isMobile = false
 }) => {
   const [form] = Form.useForm();
 
@@ -48,9 +50,10 @@ const ConfigGroup: React.FC<ConfigGroupProps> = ({
       form={form}
       layout="vertical"
       initialValues={configs}
+      size={isMobile ? "middle" : "large"}
     >
       {Object.keys(configs).map(key => (
-        <Row key={key} gutter={16} align="middle">
+        <Row key={key} gutter={isMobile ? [8, 8] : [16, 16]} align="middle">
           <Col xs={24} lg={16}>
             <Form.Item
               name={key}
@@ -72,12 +75,20 @@ const ConfigGroup: React.FC<ConfigGroupProps> = ({
               )}
             </Form.Item>
           </Col>
-          <Col xs={24} lg={8} style={{ textAlign: 'right' }}>
+          <Col xs={24} lg={8} style={{ 
+            textAlign: isMobile ? 'left' : 'right',
+            marginTop: isMobile ? -10 : 0,
+            marginBottom: isMobile ? 10 : 0
+          }}>
             <Button 
               type="primary"
               icon={<SaveOutlined />}
               onClick={() => handleSaveSingle(key)}
-              style={{ marginBottom: 24 }}
+              style={{ 
+                marginBottom: isMobile ? 16 : 24,
+                width: isMobile ? '100%' : 'auto'
+              }}
+              size={isMobile ? "middle" : "large"}
             >
               保存
             </Button>
@@ -89,8 +100,9 @@ const ConfigGroup: React.FC<ConfigGroupProps> = ({
         <Button
           type="primary"
           onClick={handleSaveAll}
-          style={{ marginTop: 16 }}
+          style={{ marginTop: isMobile ? 8 : 16 }}
           block
+          size={isMobile ? "middle" : "large"}
         >
           保存所有
         </Button>

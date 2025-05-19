@@ -3,6 +3,7 @@ import { Tabs, Card, message, Spin, Select } from 'antd';
 import { CloudOutlined, DatabaseOutlined } from '@ant-design/icons';
 import { getAllConfigs, setConfig } from '../../api';
 import ConfigGroup from './ConfigGroup.tsx';
+import useIsMobile from '../../hooks/useIsMobile';
 
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -14,6 +15,7 @@ interface ConfigStructure {
 }
 
 const SystemConfig: React.FC = () => {
+  const isMobile = useIsMobile();
   const [loading, setLoading] = useState(true);
   const [configs, setConfigs] = useState<ConfigStructure>({});
   const [activeKey, setActiveKey] = useState('AI');
@@ -92,13 +94,27 @@ const SystemConfig: React.FC = () => {
   }, []);
 
   return (
-    <Card title="系统配置" className="system-config-card">
+    <Card 
+      title="系统配置" 
+      className="system-config-card"
+      bodyStyle={{ 
+        padding: isMobile ? '12px 8px' : '24px' 
+      }}
+    >
       {loading ? (
         <div style={{ textAlign: 'center', padding: '20px' }}>
           <Spin tip="加载配置中..." />
         </div>
       ) : (
-        <Tabs activeKey={activeKey} onChange={setActiveKey}>
+        <Tabs 
+          activeKey={activeKey} 
+          onChange={setActiveKey}
+          size={isMobile ? "small" : "middle"}
+          tabPosition={isMobile ? "top" : "left"}
+          style={{ 
+            minHeight: isMobile ? 'auto' : 400
+          }}
+        >
           <TabPane tab="AI 设置" key="AI">
             <ConfigGroup
               groupName="AI"
@@ -115,6 +131,7 @@ const SystemConfig: React.FC = () => {
                 Model: 'AI 模型名称',
                 EmbeddingModel: '嵌入向量模型名称'
               }}
+              isMobile={isMobile}
             />
           </TabPane>
 
@@ -166,14 +183,28 @@ const SystemConfig: React.FC = () => {
           </TabPane>
 
           <TabPane tab="存储设置" key="Storage">
-            <div style={{ marginBottom: 20 }}>
-              <span style={{ marginRight: 8, display: 'inline-block', width: 100 }}>默认存储:</span>
+            <div style={{ 
+              marginBottom: isMobile ? 16 : 20,
+              display: 'flex',
+              flexDirection: isMobile ? 'column' : 'row',
+              alignItems: isMobile ? 'flex-start' : 'center',
+              gap: isMobile ? 8 : 0
+            }}>
+              <span style={{ 
+                marginRight: isMobile ? 0 : 8, 
+                display: 'inline-block', 
+                width: isMobile ? 'auto' : 100,
+                marginBottom: isMobile ? 4 : 0
+              }}>
+                默认存储:
+              </span>
               <Select 
                 value={configs.Storage?.DefaultStorage || 'Telegram'} 
                 onChange={(value) => {
                   handleSaveConfig('Storage', 'DefaultStorage', value);
                 }}
-                style={{ width: 200 }}
+                style={{ width: isMobile ? '100%' : 200 }}
+                size={isMobile ? "middle" : "large"}
               >
                 {storageOptions.map(option => (
                   <Option key={option.value} value={option.value}>
@@ -186,14 +217,28 @@ const SystemConfig: React.FC = () => {
               </Select>
             </div>
             
-            <div style={{ marginBottom: 20 }}>
-              <span style={{ marginRight: 8, display: 'inline-block', width: 100 }}>配置存储:</span>
+            <div style={{ 
+              marginBottom: isMobile ? 16 : 20,
+              display: 'flex',
+              flexDirection: isMobile ? 'column' : 'row',
+              alignItems: isMobile ? 'flex-start' : 'center',
+              gap: isMobile ? 8 : 0
+            }}>
+              <span style={{ 
+                marginRight: isMobile ? 0 : 8,
+                display: 'inline-block', 
+                width: isMobile ? 'auto' : 100,
+                marginBottom: isMobile ? 4 : 0
+              }}>
+                配置存储:
+              </span>
               <Select 
                 value={storageType} 
                 onChange={(value) => {
                   setStorageType(value);
                 }}
-                style={{ width: 200 }}
+                style={{ width: isMobile ? '100%' : 200 }}
+                size={isMobile ? "middle" : "large"}
               >
                 {storageOptions.map(option => (
                   <Option key={option.value} value={option.value}>
@@ -218,6 +263,7 @@ const SystemConfig: React.FC = () => {
                   "TelegramStorageBotToken": 'Telegram 机器人令牌',
                   "TelegramStorageChatId": 'Telegram 聊天ID'
                 }}
+                isMobile={isMobile}
               />
             )}
           </TabPane>

@@ -2,24 +2,44 @@ import React from 'react';
 import { Card, Form, Input, Button } from 'antd';
 import { useAuth } from '../../api/AuthContext';
 import UserAvatar from '../../components/UserAvatar';
+import useIsMobile from '../../hooks/useIsMobile';
 
 const UserProfile: React.FC = () => {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   
   return (
-    <Card title="个人资料" style={{ maxWidth: 600 }}>
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
+    <Card 
+      title="个人资料" 
+      style={{ 
+        maxWidth: '100%',
+        margin: isMobile ? '0 auto' : '0 auto',
+        boxShadow: isMobile ? 'none' : '0 1px 3px rgba(0,0,0,0.1)'
+      }}
+      bodyStyle={{ 
+        padding: isMobile ? '16px 12px' : '24px' 
+      }}
+    >
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        marginBottom: isMobile ? 16 : 24 
+      }}>
         <UserAvatar 
-          size={100}
+          size={isMobile ? 80 : 100}
           email={user?.email}
           text={user?.userName}
         />
       </div>
       
-      <Form layout="vertical" initialValues={{
-        username: user?.userName || '',
-        email: user?.email || '',
-      }}>
+      <Form 
+        layout="vertical" 
+        initialValues={{
+          username: user?.userName || '',
+          email: user?.email || '',
+        }}
+        size={isMobile ? "middle" : "large"}
+      >
         <Form.Item name="username" label="用户名">
           <Input placeholder="用户名" />
         </Form.Item>
@@ -37,7 +57,16 @@ const UserProfile: React.FC = () => {
         </Form.Item>
         
         <Form.Item>
-          <Button type="primary">保存更改</Button>
+          <Button 
+            type="primary" 
+            block={isMobile}
+            size={isMobile ? "middle" : "large"}
+            style={{
+              height: isMobile ? 40 : 'auto'
+            }}
+          >
+            保存更改
+          </Button>
         </Form.Item>
       </Form>
     </Card>

@@ -1,13 +1,15 @@
 import { useState, useRef, useMemo, useCallback } from 'react';
-import { Typography, Button, Dropdown, message } from 'antd';
+import { Typography, Button, Dropdown, message, Row, Col } from 'antd';
 import { SortAscendingOutlined, UploadOutlined } from '@ant-design/icons';
 import type { PictureResponse } from '../../api';
 import ImageUploadDialog from '../../components/upload/ImageUploadDialog';
 import ImageGrid from '../../components/image/ImageGrid';
+import useIsMobile from '../../hooks/useIsMobile';
 
 const { Title } = Typography;
 
 function AllImages() {
+  const isMobile = useIsMobile();
   const [images, setImages] = useState<PictureResponse[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
@@ -76,60 +78,66 @@ function AllImages() {
   return (
     <>
       <div style={{
-        marginBottom: 50,
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+        marginBottom: isMobile ? 30 : 50,
         position: 'relative',
         zIndex: 1
       }}>
-        <div>
-          <Title level={2} style={{
-            margin: 0,
-            marginBottom: 10,
-            fontWeight: 600,
-            letterSpacing: '0.5px',
-            fontSize: 32,
-            background: 'linear-gradient(120deg, #000000, #444444)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}>所有图片</Title>
-        </div>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <Button
-            type="primary"
-            icon={<UploadOutlined />}
-            style={{
-              borderRadius: 10,
-              height: 46,
-              padding: '0 24px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              fontSize: 15
-            }}
-            onClick={() => setIsUploadDialogVisible(true)}
-          >
-            上传图片
-          </Button>
-          <Dropdown menu={sortMenu} placement="bottomRight">
-            <Button style={{
-              borderRadius: 10,
-              height: 46,
-              border: '1px solid #f0f0f0',
-              padding: '0 24px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              fontSize: 15,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
-              background: '#ffffff'
+        <Row gutter={[16, 16]} align="middle">
+          <Col xs={24} sm={24} md={12} lg={12}>
+            <Title level={2} style={{
+              margin: 0,
+              marginBottom: isMobile ? 5 : 10,
+              fontWeight: 600,
+              letterSpacing: '0.5px',
+              fontSize: isMobile ? 24 : 32,
+              background: 'linear-gradient(120deg, #000000, #444444)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              textAlign: isMobile ? 'center' : 'left',
+            }}>所有图片</Title>
+          </Col>
+          <Col xs={24} sm={24} md={12} lg={12}>
+            <div style={{ 
+              display: 'flex', 
+              gap: isMobile ? 8 : 12,
+              justifyContent: isMobile ? 'center' : 'flex-end' 
             }}>
-              <SortAscendingOutlined />
-              排序方式
-            </Button>
-          </Dropdown>
-        </div>
+              <Button
+                type="primary"
+                icon={<UploadOutlined />}
+                style={{
+                  borderRadius: 10,
+                  height: isMobile ? 40 : 46,
+                  padding: isMobile ? '0 15px' : '0 24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  fontSize: isMobile ? 14 : 15
+                }}
+                onClick={() => setIsUploadDialogVisible(true)}
+              >
+                上传图片
+              </Button>
+              <Dropdown menu={sortMenu} placement="bottomRight">
+                <Button style={{
+                  borderRadius: 10,
+                  height: isMobile ? 40 : 46,
+                  border: '1px solid #f0f0f0',
+                  padding: isMobile ? '0 15px' : '0 24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  fontSize: isMobile ? 14 : 15,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+                  background: '#ffffff'
+                }}>
+                  <SortAscendingOutlined />
+                  {!isMobile && "排序方式"}
+                </Button>
+              </Dropdown>
+            </div>
+          </Col>
+        </Row>
       </div>
 
       <ImageGrid
