@@ -1,48 +1,47 @@
-import { useState, useEffect } from 'react';
-import { Outlet, useNavigate, useLocation, matchPath } from 'react-router';
-import { Layout, theme } from 'antd';
-import { clearAuthData, getStoredUser, isAuthenticated } from '../api';
+import {useState, useEffect} from 'react';
+import {Outlet, useNavigate, useLocation, matchPath} from 'react-router';
+import {Layout, theme} from 'antd';
+import {clearAuthData, isAuthenticated} from '../api';
 import useIsMobile from '../hooks/useIsMobile';
-
+import {useAuth} from '../api/AuthContext';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import routes, { type RouteConfig } from '../config/routeConfig';
+import routes, {type RouteConfig} from '../config/routeConfig';
 
-const { Content } = Layout;
+const {Content} = Layout;
 
 function MainLayout() {
+    const {refreshUser} = useAuth();
     const isMobile = useIsMobile();
-    const [collapsed, setCollapsed] = useState(isMobile); // 移动设备默认折叠侧边栏
-    // 重命名避免未使用警告，或用于未来扩展
-    const [, setUser] = useState<any>(null);
+    const [collapsed, setCollapsed] = useState(isMobile);
     const [currentRouteData, setCurrentRouteData] = useState<{
         routeInfo: RouteConfig | undefined;
         params: Record<string, string>;
         title?: string;
-    }>({ 
-        routeInfo: undefined, 
-        params: {} 
+    }>({
+        routeInfo: undefined,
+        params: {}
     });
-    
+
     const navigate = useNavigate();
     const location = useLocation();
-    
+
     const {
-        token: { colorBgContainer },
+        token: {colorBgContainer},
     } = theme.useToken();
 
     // 查找当前路由信息
     const findCurrentRoute = () => {
         const pathname = location.pathname;
-        
+
         // 测试每个路由是否匹配当前路径
         for (const route of routes) {
             const match = matchPath(
-                { path: `/${route.path}`, end: true },
+                {path: `/${route.path}`, end: true},
                 pathname
             );
-            
+
             if (match) {
                 return {
                     routeInfo: route,
@@ -55,19 +54,19 @@ function MainLayout() {
                 };
             }
         }
-        
+
         // 如果没有完全匹配，尝试找到包含参数的路由
         for (const route of routes) {
-            const pattern = route.path.includes(':') 
-                ? `/${route.path.split('/:')[0]}` 
+            const pattern = route.path.includes(':')
+                ? `/${route.path.split('/:')[0]}`
                 : `/${route.path}`;
-                
+
             if (pathname.startsWith(pattern)) {
                 const match = matchPath(
-                    { path: `/${route.path}`, end: false },
+                    {path: `/${route.path}`, end: false},
                     pathname
                 );
-                
+
                 if (match) {
                     return {
                         routeInfo: route,
@@ -81,10 +80,10 @@ function MainLayout() {
                 }
             }
         }
-        
-        return { 
-            routeInfo: undefined, 
-            params: {} 
+
+        return {
+            routeInfo: undefined,
+            params: {}
         };
     };
 
@@ -93,11 +92,8 @@ function MainLayout() {
             navigate('/login');
             return;
         }
-        const storedUser = getStoredUser();
-        if (storedUser) {
-            setUser(storedUser);
-        }
-    }, [navigate]);
+        refreshUser();
+    }, [navigate, refreshUser]);
 
     // 监听路由变化，更新当前路由信息
     useEffect(() => {
@@ -127,10 +123,10 @@ function MainLayout() {
             fontWeight: 400
         }}>
             {/* 侧边栏组件 - 添加onClose回调 */}
-            <Sidebar 
-                collapsed={collapsed} 
-                isMobile={isMobile} 
-                onClose={toggleCollapsed} 
+            <Sidebar
+                collapsed={collapsed}
+                isMobile={isMobile}
+                onClose={toggleCollapsed}
             />
 
             <Layout>
@@ -161,16 +157,13 @@ function MainLayout() {
                         overflow: 'hidden'
                     }}>
                         {/* 渲染子路由组件 */}
-                        <Outlet context={{ 
-                            updateBreadcrumbTitle: (title: string) => {
-                                setCurrentRouteData(prev => ({ ...prev, title }));
-                            },
+                        <Outlet context={{
                             isMobile
-                        }} />
+                        }}/>
                     </div>
                 </Content>
                 {/* 页脚组件 */}
-                <Footer isMobile={isMobile} />
+                <Footer isMobile={isMobile}/>
             </Layout>
         </Layout>
     );
