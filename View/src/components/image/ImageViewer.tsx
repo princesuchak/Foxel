@@ -264,7 +264,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
 
                 <div className="zoom-controls">
                   <Space>
-                    <Button icon={<ExpandOutlined />} onClick={(e) => resetTransform()} />
+                    <Button icon={<ExpandOutlined />} onClick={(_e) => resetTransform()} />
                     <Button icon={<ZoomOutOutlined />} onClick={() => zoomOut(0.5)} />
                     <Button icon={<ZoomInOutlined />} onClick={() => zoomIn(0.5)} />
                     <Button icon={<RotateLeftOutlined />} onClick={() => setRotation(prev => prev - 90)} />
