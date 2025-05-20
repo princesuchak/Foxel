@@ -198,3 +198,10 @@ export const UserRole = {
   User: "User" as UserRole,
   Guest: "" as UserRole
 };
+
+export interface UpdateUserRequest {
+  userName?: string;
+  email?: string;
+  currentPassword?: string;
+  newPassword?: string;
+}

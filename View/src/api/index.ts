@@ -10,6 +10,7 @@ export {
     register,
     login,
     getCurrentUser,
+    updateUserInfo,  // 添加导出更新用户信息函数
     saveAuthData,
     clearAuthData,
     isAuthenticated,

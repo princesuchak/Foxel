@@ -1,4 +1,4 @@
-import {type BaseResult, type AuthResponse, type LoginRequest, type RegisterRequest, type UserProfile} from './types';
+import {type BaseResult, type AuthResponse, type LoginRequest, type RegisterRequest, type UserProfile, type UpdateUserRequest} from './types';
 import {fetchApi, BASE_URL} from './fetchClient';
 
 // 认证数据本地存储键
@@ -54,6 +54,36 @@ export async function getCurrentUser(): Promise<BaseResult<UserProfile>> {
         return {
             success: false,
             message: `获取用户信息失败: ${error.message}`,
+            code: 500
+        };
+    }
+}
+
+// 更新用户信息
+export async function updateUserInfo(data: UpdateUserRequest): Promise<BaseResult<UserProfile>> {
+    try {
+        const response = await fetchApi<UserProfile>('/auth/update', {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+
+        // 如果成功更新用户数据，更新本地存储
+        if (response.success && response.data) {
+            const user = getStoredUser();
+            if (user) {
+                const updatedUser = {
+                    ...user,
+                    ...response.data
+                };
+                localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
+            }
+        }
+
+        return response;
+    } catch (error: any) {
+        return {
+            success: false,
+            message: `更新用户信息失败: ${error.message}`,
             code: 500
         };
     }
