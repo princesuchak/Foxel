@@ -25,6 +25,14 @@ interface ImageViewerProps {
   onShare?: (image: PictureResponse) => void;
 }
 
+// 添加图片缓存对象
+interface ImageCache {
+  [key: string]: {
+    loaded: boolean;
+    img: HTMLImageElement;
+  }
+}
+
 const ImageViewer: React.FC<ImageViewerProps> = ({
   visible,
   onClose,
@@ -45,28 +53,65 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
   const [localImages, setLocalImages] = useState<PictureResponse[]>(images);
   const [shareDialogVisible, setShareDialogVisible] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const preloadImageRef = useRef<HTMLImageElement | null>(null);
-  const [cacheKey, setCacheKey] = useState<number>(Date.now());
+  
+  // 修改：使用 useRef 存储图片缓存，避免重复加载
+  const imageCache = useRef<ImageCache>({});
+  
+  // 替换原来的 cacheKey
+  const sessionKey = useRef<string>(Date.now().toString());
   
   const currentImage = localImages[currentIndex];
+
+  // 预加载图片的范围
+  const preloadRange = 2; // 当前图片前后各预加载2张
 
   const resetViewerState = useCallback(() => {
     setRotation(0);
     setIsInfoDrawerOpen(false);
     setImageLoaded(false);
-    setCacheKey(Date.now());
   }, []);
 
+  // 优化图片加载函数
+  const loadImage = useCallback((imageUrl: string): Promise<HTMLImageElement> => {
+    return new Promise((resolve, reject) => {
+      // 检查是否已经缓存
+      if (imageCache.current[imageUrl]?.loaded) {
+        setImageLoaded(true);
+        return resolve(imageCache.current[imageUrl].img);
+      }
+
+      const img = new Image();
+      img.onload = () => {
+        // 更新缓存
+        imageCache.current[imageUrl] = {
+          loaded: true,
+          img
+        };
+        resolve(img);
+      };
+      img.onerror = () => {
+        reject(new Error(`Failed to load image: ${imageUrl}`));
+      };
+      
+      // 使用相对持久的缓存键，而不是每次都更新
+      img.src = `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}_s=${sessionKey.current}`;
+    });
+  }, []);
+
+  // 修改：当图片索引变化时只设置加载状态，不重置缓存键
   useEffect(() => {
     setImageLoaded(false);
-    setCacheKey(Date.now());
   }, [currentIndex]);
 
+  // 修改：查看器可见性改变时的处理逻辑
   useEffect(() => {
     if (visible && !wasVisible.current) {
       resetViewerState();
-    } else if (!visible && wasVisible.current) {
-      setTimeout(() => setCacheKey(Date.now()), 300);
+      
+      // 生成会话唯一的缓存键，而不是每次都更新
+      if (!sessionKey.current) {
+        sessionKey.current = Date.now().toString();
+      }
     }
     wasVisible.current = visible;
   }, [visible, resetViewerState]);
@@ -77,24 +122,39 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
     }
   }, [visible, initialIndex, images.length]);
 
+  // 修改：加载当前图片并预加载相邻图片
   useEffect(() => {
-    if (currentImage) {
-      const img = new Image();
-      img.onload = () => {
-        setImageLoaded(true);
-        preloadImageRef.current = img;
-      };
-      const cacheBuster = `${currentImage.path}${currentImage.path.includes('?') ? '&' : '?'}_cb=${cacheKey}`;
-      img.src = cacheBuster;
-      
-      return () => {
-        img.onload = null;
-        if (preloadImageRef.current === img) {
-          preloadImageRef.current = null;
+    if (!currentImage || !visible) return;
+
+    // 加载当前图片
+    const imagePath = currentImage.path;
+    loadImage(imagePath)
+      .then(() => setImageLoaded(true))
+      .catch(error => {
+        console.error('Failed to load image:', error);
+        message.error('图片加载失败，请重试');
+      });
+    
+    // 预加载相邻图片
+    if (localImages.length > 1) {
+      // 使用 setTimeout 延迟预加载，优先加载当前图片
+      setTimeout(() => {
+        for (let i = 1; i <= preloadRange; i++) {
+          // 预加载后面的图片
+          const nextIndex = currentIndex + i;
+          if (nextIndex < localImages.length) {
+            loadImage(localImages[nextIndex].path).catch(() => {});
+          }
+          
+          // 预加载前面的图片
+          const prevIndex = currentIndex - i;
+          if (prevIndex >= 0) {
+            loadImage(localImages[prevIndex].path).catch(() => {});
+          }
         }
-      };
+      }, 300);
     }
-  }, [currentImage, cacheKey]);
+  }, [currentImage, visible, currentIndex, localImages, loadImage]);
 
   useEffect(() => {
     setLocalImages(images);
@@ -213,6 +273,11 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
     return null;
   }
 
+  // 修改：更新图片URL，使用会话缓存键
+  const getImageUrl = (path: string) => {
+    return `${path}${path.includes('?') ? '&' : '?'}_s=${sessionKey.current}`;
+  };
+
   return (
     <div
       className={`image-viewer-container ${visible ? 'visible' : ''}`}
@@ -243,7 +308,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
                 >
                   {currentImage && (
                     <img
-                      src={`${currentImage.path}${currentImage.path.includes('?') ? '&' : '?'}_cb=${cacheKey}`}
+                      src={getImageUrl(currentImage.path)}
                       alt={currentImage.name}
                       style={{
                         transform: `rotate(${rotation}deg)`,
