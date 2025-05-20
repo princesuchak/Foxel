@@ -16,7 +16,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IConfigService, ConfigService>();
         services.AddSingleton<IAiService, AiService>();
         services.AddSingleton<IPictureService, PictureService>();
-        services.AddSingleton<IUserService, UserService>();
+        services.AddSingleton<IAuthService, AuthService>();
         services.AddSingleton<ITagService, TagService>();
         services.AddSingleton<IAlbumService, AlbumService>();
         services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
