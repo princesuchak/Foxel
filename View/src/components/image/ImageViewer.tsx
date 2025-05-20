@@ -1,21 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Button, Space, Dropdown, message } from 'antd';
+import { Button, Space, Dropdown, message, Spin } from 'antd';
 import {
-  ZoomInOutlined,
-  ZoomOutOutlined,
-  ExpandOutlined,
-  InfoCircleOutlined,
-  CloseOutlined,
-  LeftOutlined,
-  RightOutlined,
-  RotateLeftOutlined,
-  RotateRightOutlined,
-  HeartOutlined,
-  HeartFilled,
-  DownloadOutlined,
-  ShareAltOutlined,
-  FolderAddOutlined,
-  EyeOutlined
+  ZoomInOutlined, ZoomOutOutlined, ExpandOutlined, InfoCircleOutlined,
+  CloseOutlined, LeftOutlined, RightOutlined, RotateLeftOutlined,
+  RotateRightOutlined, HeartOutlined, HeartFilled, DownloadOutlined,
+  ShareAltOutlined, FolderAddOutlined
 } from '@ant-design/icons';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import type { PictureResponse, AlbumResponse } from '../../api/types';
@@ -23,7 +12,6 @@ import { getAlbums, addPicturesToAlbum, favoritePicture, unfavoritePicture } fro
 import ImageInfo from './ImageInfo';
 import ShareImageDialog from './ShareImageDialog';
 import './ImageViewer.css';
-
 
 interface ImageViewerProps {
   visible: boolean;
@@ -45,7 +33,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
   onFavorite,
   onNext,
   onPrevious,
-  showFavoriteCount = false, // 默认不显示收藏数量
+  showFavoriteCount = false,
   onShare,
 }) => {
   const wasVisible = useRef(visible);
@@ -56,80 +44,71 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
   const [loadingAlbums, setLoadingAlbums] = useState(false);
   const [localImages, setLocalImages] = useState<PictureResponse[]>(images);
   const [shareDialogVisible, setShareDialogVisible] = useState(false);
-
-  // 保留加载状态跟踪，但不再用于显示缩略图
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [showOriginal, setShowOriginal] = useState(false); // 新增：控制是否显示原图
-
-  // 保留防缓存机制
+  const preloadImageRef = useRef<HTMLImageElement | null>(null);
   const [cacheKey, setCacheKey] = useState<number>(Date.now());
-
-  // 当前显示的图片
+  
   const currentImage = localImages[currentIndex];
 
-  // 重置查看器状态，包含图片加载状态
   const resetViewerState = useCallback(() => {
     setRotation(0);
     setIsInfoDrawerOpen(false);
-    setImageLoaded(false); // 重置图片加载状态
-    setShowOriginal(false); // 重置为显示缩略图
-    setCacheKey(Date.now()); // 每次重置时更新缓存键
+    setImageLoaded(false);
+    setCacheKey(Date.now());
   }, []);
 
   useEffect(() => {
     setImageLoaded(false);
-    setShowOriginal(false); // 切换图片时重置为缩略图模式
-  }, [currentIndex]);
-
-  // 监听visible变化的处理
-  useEffect(() => {
-    // 当查看器从不可见变为可见时
-    if (visible && !wasVisible.current) {
-      if (initialIndex >= 0 && initialIndex < images.length) {
-        setCurrentIndex(initialIndex);
-      }
-      resetViewerState();
-    }
-    // 当查看器从可见变为不可见时
-    else if (!visible && wasVisible.current) {
-      // 关闭后等待一小段时间再更新缓存键，确保下次打开时强制刷新图片
-      setTimeout(() => setCacheKey(Date.now()), 300);
-    }
-
-    // 更新ref以跟踪visible的变化
-    wasVisible.current = visible;
-  }, [visible, initialIndex, images.length, resetViewerState]);
-
-  // 当currentIndex变化时，重置图片加载状态并更新缓存键
-  useEffect(() => {
-    setImageLoaded(false);
-    setShowOriginal(false); // 重置为缩略图模式
     setCacheKey(Date.now());
   }, [currentIndex]);
 
-  // 当外部传入的images发生变化时，更新本地缓存
+  useEffect(() => {
+    if (visible && !wasVisible.current) {
+      resetViewerState();
+    } else if (!visible && wasVisible.current) {
+      setTimeout(() => setCacheKey(Date.now()), 300);
+    }
+    wasVisible.current = visible;
+  }, [visible, resetViewerState]);
+  
+  useEffect(() => {
+    if (visible && initialIndex >= 0 && initialIndex < images.length) {
+      setCurrentIndex(initialIndex);
+    }
+  }, [visible, initialIndex, images.length]);
+
+  useEffect(() => {
+    if (currentImage) {
+      const img = new Image();
+      img.onload = () => {
+        setImageLoaded(true);
+        preloadImageRef.current = img;
+      };
+      const cacheBuster = `${currentImage.path}${currentImage.path.includes('?') ? '&' : '?'}_cb=${cacheKey}`;
+      img.src = cacheBuster;
+      
+      return () => {
+        img.onload = null;
+        if (preloadImageRef.current === img) {
+          preloadImageRef.current = null;
+        }
+      };
+    }
+  }, [currentImage, cacheKey]);
+
   useEffect(() => {
     setLocalImages(images);
   }, [images]);
 
-  // 处理键盘事件
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!visible) return;
 
       switch (e.key) {
-        case 'ArrowLeft':
-          handlePrevious();
-          break;
-        case 'ArrowRight':
-          handleNext();
-          break;
-        case 'Escape':
-          onClose();
-          break;
-        case 'i':
-          setIsInfoDrawerOpen(prev => !prev);
-          break;
+        case 'ArrowLeft': handlePrevious(); break;
+        case 'ArrowRight': handleNext(); break;
+        case 'Escape': onClose(); break;
+        case 'i': setIsInfoDrawerOpen(prev => !prev); break;
       }
     };
 
@@ -137,81 +116,56 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [visible, currentIndex, images.length]);
 
-  // 处理上一张图片
   const handlePrevious = useCallback(() => {
     if (currentIndex > 0) {
       setCurrentIndex(prevIndex => prevIndex - 1);
-      if (onPrevious) onPrevious();
+      onPrevious?.();
     }
   }, [currentIndex, onPrevious]);
 
-  // 处理下一张图片
   const handleNext = useCallback(() => {
     if (currentIndex < images.length - 1) {
       setCurrentIndex(prevIndex => prevIndex + 1);
-      if (onNext) onNext();
+      onNext?.();
     }
   }, [currentIndex, images.length, onNext]);
 
-  // 处理收藏按钮点击
   const handleFavoriteClick = useCallback(async () => {
     if (!currentImage) return;
 
     try {
-      // 如果提供了onFavorite回调，直接使用它，不再重复发送请求
       if (onFavorite) {
         onFavorite(currentImage);
         return;
       }
 
-      // 只有在没有提供onFavorite回调时才直接发送网络请求
-      let result;
-      if (currentImage.isFavorited) {
-        result = await unfavoritePicture(currentImage.id);
-        if (result.success) {
-          message.success('已取消收藏');
-        } else {
-          message.error(result.message || '取消收藏失败');
-          return; // 如果请求失败，不更新UI状态
-        }
+      const isFavorited = currentImage.isFavorited;
+      const result = isFavorited 
+        ? await unfavoritePicture(currentImage.id)
+        : await favoritePicture(currentImage.id);
+      
+      if (result.success) {
+        message.success(isFavorited ? '已取消收藏' : '已添加到收藏');
+        setLocalImages(prevImages =>
+          prevImages.map(img =>
+            img.id === currentImage.id ? {
+              ...img,
+              isFavorited: !isFavorited,
+              favoriteCount: isFavorited
+                ? Math.max(0, (img.favoriteCount || 0) - 1)
+                : (img.favoriteCount || 0) + 1
+            } : img
+          )
+        );
       } else {
-        result = await favoritePicture(currentImage.id);
-        if (result.success) {
-          message.success('已添加到收藏');
-        } else {
-          message.error(result.message || '收藏失败');
-          return; // 如果请求失败，不更新UI状态
-        }
+        message.error(result.message || (isFavorited ? '取消收藏失败' : '收藏失败'));
       }
-
-      // 请求成功后，更新本地状态
-      setLocalImages(prevImages =>
-        prevImages.map(img =>
-          img.id === currentImage.id ? {
-            ...img,
-            isFavorited: !img.isFavorited,
-            favoriteCount: img.isFavorited
-              ? Math.max(0, (img.favoriteCount || 0) - 1)
-              : (img.favoriteCount || 0) + 1
-          } : img
-        )
-      );
     } catch (error) {
       console.error('收藏操作失败:', error);
       message.error('操作失败，请重试');
     }
   }, [currentImage, onFavorite]);
 
-  // 处理旋转
-  const handleRotateLeft = () => {
-    setRotation(prev => prev - 90);
-  };
-
-  const handleRotateRight = () => {
-    setRotation(prev => prev + 90);
-  };
-
-  // 加载相册
   useEffect(() => {
     if (visible) {
       loadAlbums();
@@ -236,13 +190,8 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
     if (!currentImage) return;
 
     try {
-      // 使用新的批量添加方法，参数为数组
       const result = await addPicturesToAlbum(albumId, [currentImage.id]);
-      if (result.success) {
-        message.success('已添加到相册');
-      } else {
-        message.error(result.message || '添加到相册失败');
-      }
+      message.success(result.success ? '已添加到相册' : (result.message || '添加到相册失败'));
     } catch (error) {
       console.error('添加到相册失败:', error);
       message.error('添加到相册失败，请重试');
@@ -255,44 +204,11 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
     onClick: () => handleAddToAlbum(album.id)
   }));
 
-  // 处理切换到原图
-  const handleToggleOriginal = () => {
-    setShowOriginal(prev => !prev);
-  };
-
-  // 处理图片加载完成事件
-  const handleImageLoaded = () => {
-    setImageLoaded(true);
-  };
-
-  // 新增：检测图片是否已经加载
-  useEffect(() => {
-    // 如果当前图片已加载到缓存中
-    if (currentImage && !imageLoaded) {
-      const img = new Image();
-      img.onload = () => {
-        // 图片已在缓存中，立即设置为已加载
-        setImageLoaded(true);
-      };
-
-      // 添加缓存键参数强制刷新
-      const cacheBuster = `${currentImage.path}${currentImage.path.includes('?') ? '&' : '?'}_cb=${cacheKey}`;
-      img.src = cacheBuster;
-    }
-  }, [currentImage, imageLoaded, cacheKey]);
-
-  // 处理分享按钮点击
   const handleShareClick = useCallback(() => {
     if (!currentImage) return;
-
-    if (onShare) {
-      onShare(currentImage);
-    } else {
-      setShareDialogVisible(true);
-    }
+    onShare ? onShare(currentImage) : setShareDialogVisible(true);
   }, [currentImage, onShare]);
 
-  // 当没有图片或当前图片不存在时，不渲染任何内容
   if (images.length === 0 || !currentImage) {
     return null;
   }
@@ -325,43 +241,40 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
                   wrapperClass="transform-wrapper"
                   contentClass="transform-content"
                 >
-                  <img
-                    src={showOriginal
-                      ? `${currentImage.path}${currentImage.path.includes('?') ? '&' : '?'}_cb=${cacheKey}`
-                      : `${currentImage.thumbnailPath || currentImage.path}${(currentImage.thumbnailPath || currentImage.path).includes('?') ? '&' : '?'}_cb=${cacheKey}`
-                    }
-                    alt={currentImage.name}
-                    style={{
-                      transform: `rotate(${rotation}deg)`,
-                      opacity: imageLoaded ? 1 : 0.3,
-                      transition: 'opacity 0.3s ease'
-                    }}
-                    className={`viewer-img ${showOriginal ? '' : 'thumbnail'}`}
-                    loading="lazy"
-                    onLoad={handleImageLoaded}
-                  />
+                  {currentImage && (
+                    <img
+                      src={`${currentImage.path}${currentImage.path.includes('?') ? '&' : '?'}_cb=${cacheKey}`}
+                      alt={currentImage.name}
+                      style={{
+                        transform: `rotate(${rotation}deg)`,
+                        opacity: imageLoaded ? 1 : 0.3,
+                        transition: 'opacity 0.3s ease'
+                      }}
+                      className="viewer-img"
+                      loading="lazy"
+                    />
+                  )}
                 </TransformComponent>
+
+                {!imageLoaded && (
+                  <div className="image-loading-spinner">
+                    <Spin size="large" tip={<span className="loading-text">图片加载中...</span>} />
+                  </div>
+                )}
 
                 <div className="zoom-controls">
                   <Space>
-                    <Button icon={<ExpandOutlined />} onClick={() => resetTransform()} />
+                    <Button icon={<ExpandOutlined />} onClick={(e) => resetTransform()} />
                     <Button icon={<ZoomOutOutlined />} onClick={() => zoomOut(0.5)} />
                     <Button icon={<ZoomInOutlined />} onClick={() => zoomIn(0.5)} />
-                    <Button icon={<RotateLeftOutlined />} onClick={handleRotateLeft} />
-                    <Button icon={<RotateRightOutlined />} onClick={handleRotateRight} />
-                    <Button
-                      icon={<EyeOutlined />}
-                      onClick={handleToggleOriginal}
-                      type={showOriginal ? "primary" : "default"}
-                      title={showOriginal ? "正在查看原图" : "查看原图"}
-                    />
+                    <Button icon={<RotateLeftOutlined />} onClick={() => setRotation(prev => prev - 90)} />
+                    <Button icon={<RotateRightOutlined />} onClick={() => setRotation(prev => prev + 90)} />
                   </Space>
                 </div>
               </>
             )}
           </TransformWrapper>
 
-          {/* 图片导航按钮 */}
           {currentIndex > 0 && (
             <Button
               className="nav-button prev-button"
@@ -383,7 +296,6 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
           )}
         </div>
 
-        {/* 顶部操作栏 */}
         <div className="viewer-header">
           <div className="image-counter">
             {currentIndex + 1} / {images.length}
@@ -404,11 +316,8 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
           </div>
         </div>
 
-        {/* 底部操作栏 */}
         <div className="viewer-footer">
-          <div className="image-name">
-            {currentImage.name}
-          </div>
+          <div className="image-name">{currentImage.name}</div>
 
           <div className="footer-actions">
             {onFavorite && (
@@ -449,7 +358,6 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
         </div>
       </div>
 
-      {/* 图片信息 */}
       {currentImage && (
         <ImageInfo
           image={currentImage}
@@ -458,7 +366,6 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
         />
       )}
 
-      {/* 添加分享对话框 */}
       {!onShare && currentImage && (
         <ShareImageDialog
           visible={shareDialogVisible}
