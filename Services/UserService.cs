@@ -106,7 +106,7 @@ public class UserService(IDbContextFactory<MyDbContext> dbContextFactory, IConfi
 
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        var user = await context.Users.Include(x => x.Role).FirstOrDefaultAsync(u => u.Email == email);
 
         if (user == null)
         {
