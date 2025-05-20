@@ -23,6 +23,7 @@ public static class ServiceCollectionExtensions
         services.AddHostedService<QueuedHostedService>();
         services.AddSingleton<LocalStorageProvider>();
         services.AddSingleton<TelegramStorageProvider>();
+        services.AddSingleton<S3StorageProvider>();
         services.AddSingleton<IStorageProviderFactory, StorageProviderFactory>();
         services.AddSingleton<IDatabaseInitializer, DatabaseInitializer>();
     }

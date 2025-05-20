@@ -9,6 +9,7 @@ public enum StorageType
 {
     Local = 0,
     Telegram = 1,
+    S3 = 2,
 }
 
 public class Picture : BaseModel

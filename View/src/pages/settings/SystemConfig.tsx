@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Tabs, Card, message, Spin, Select } from 'antd';
-import { CloudOutlined, DatabaseOutlined } from '@ant-design/icons';
+import { CloudOutlined, DatabaseOutlined, CloudServerOutlined } from '@ant-design/icons';
 import { getAllConfigs, setConfig } from '../../api';
 import ConfigGroup from './ConfigGroup.tsx';
 import useIsMobile from '../../hooks/useIsMobile';
@@ -84,9 +84,9 @@ const SystemConfig: React.FC = () => {
 
   // 存储类型选项
   const storageOptions = [
-    { value: 'Telegram', label: 'Telegram存储', icon: <CloudOutlined style={{ color: '#0088cc' }} /> },
     { value: 'Local', label: '本地存储', icon: <DatabaseOutlined style={{ color: '#52c41a' }} /> },
-    // 未来可以添加更多存储选项
+    { value: 'Telegram', label: 'Telegram存储', icon: <CloudOutlined style={{ color: '#0088cc' }} /> },
+    { value: 'S3', label: 'S3兼容存储', icon: <CloudServerOutlined style={{ color: '#ff9900' }} /> },
   ];
 
   useEffect(() => {
@@ -199,7 +199,7 @@ const SystemConfig: React.FC = () => {
                 默认存储:
               </span>
               <Select 
-                value={configs.Storage?.DefaultStorage || 'Telegram'} 
+                value={configs.Storage?.DefaultStorage || 'Local'} 
                 onChange={(value) => {
                   handleSaveConfig('Storage', 'DefaultStorage', value);
                 }}
@@ -262,6 +262,32 @@ const SystemConfig: React.FC = () => {
                 descriptions={{
                   "TelegramStorageBotToken": 'Telegram 机器人令牌',
                   "TelegramStorageChatId": 'Telegram 聊天ID'
+                }}
+                isMobile={isMobile}
+              />
+            )}
+
+            {storageType === 'S3' && (
+              <ConfigGroup
+                groupName="Storage"
+                configs={{
+                  "S3StorageAccessKey": configs.Storage?.S3StorageAccessKey || '',
+                  "S3StorageSecretKey": configs.Storage?.S3StorageSecretKey || '',
+                  "S3StorageBucketName": configs.Storage?.S3StorageBucketName || '',
+                  "S3StorageRegion": configs.Storage?.S3StorageRegion || '',
+                  "S3StorageEndpoint": configs.Storage?.S3StorageEndpoint || '',
+                  "S3StorageCdnUrl": configs.Storage?.S3StorageCdnUrl || '',
+                  "S3StorageUsePathStyleUrls": configs.Storage?.S3StorageUsePathStyleUrls || 'false'
+                }}
+                onSave={handleSaveConfig}
+                descriptions={{
+                  "S3StorageAccessKey": 'S3访问密钥',
+                  "S3StorageSecretKey": 'S3私有密钥',
+                  "S3StorageBucketName": 'S3存储桶名称',
+                  "S3StorageRegion": 'S3区域 (例如:us-east-1)',
+                  "S3StorageEndpoint": 'S3端点URL (可选,默认为AWS S3)',
+                  "S3StorageCdnUrl": 'CDN URL (可选,用于加速文件访问)',
+                  "S3StorageUsePathStyleUrls": '使用路径形式URLs (true/false,兼容非AWS服务)'
                 }}
                 isMobile={isMobile}
               />
