@@ -394,12 +394,6 @@ const ImageInfo: React.FC<ImageInfoProps> = ({
                 <div style={styles.specValue}>{image.exifInfo.width}×{image.exifInfo.height}</div>
                 <div style={styles.specLabel}>分辨率</div>
               </div>
-              {image.exifInfo.cameraModel && (
-                <div style={styles.specItem}>
-                  <div style={styles.specValue}>{image.exifInfo.cameraModel}</div>
-                  <div style={styles.specLabel}>相机</div>
-                </div>
-              )}
               {image.exifInfo.focalLength && (
                 <div style={styles.specItem}>
                   <div style={styles.specValue}>{image.exifInfo.focalLength}</div>
