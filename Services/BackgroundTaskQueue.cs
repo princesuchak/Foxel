@@ -217,22 +217,18 @@ public sealed class BackgroundTaskQueue : IBackgroundTaskQueue, IDisposable
             // 根据存储类型获取文件处理路径
             var storageProvider = storageProviderFactory.GetProvider(picture.StorageType);
 
+            // 处理文件获取逻辑
             if (picture.StorageType == StorageType.Local)
             {
                 // 本地存储，直接使用文件路径
                 localFilePath = Path.Combine(Directory.GetCurrentDirectory(), picture.Path.TrimStart('/'));
             }
-            else if (picture.StorageType == StorageType.Telegram)
-            {
-                // Telegram存储，需要先下载文件
-                await UpdatePictureStatus(task.PictureId, ProcessingStatus.Processing, 15);
-                var telegramProvider = (TelegramStorageProvider)storageProvider;
-                localFilePath = await telegramProvider.DownloadFileAsync(picture.Path);
-                isTempFile = true;
-            }
             else
             {
-                throw new Exception($"不支持的存储类型: {picture.StorageType}");
+                // 非本地存储需要先下载文件
+                await UpdatePictureStatus(task.PictureId, ProcessingStatus.Processing, 15);
+                localFilePath = await storageProvider.DownloadFileAsync(picture.Path);
+                isTempFile = true;
             }
 
             if (string.IsNullOrEmpty(localFilePath) || !File.Exists(localFilePath))
@@ -250,37 +246,29 @@ public sealed class BackgroundTaskQueue : IBackgroundTaskQueue, IDisposable
             await ImageHelper.CreateThumbnailAsync(localFilePath, thumbnailPath, 500);
 
             // 更新缩略图路径到数据库
-            string relativeThumbnailPath = "";
+            await UpdatePictureStatus(task.PictureId, ProcessingStatus.Processing, 25);
+            
             if (picture.StorageType == StorageType.Local)
             {
                 // 本地存储缩略图
-                relativeThumbnailPath =
-                    $"/Uploads/{Path.GetRelativePath("Uploads", Path.GetDirectoryName(thumbnailPath)!)}/{Path.GetFileName(thumbnailPath)}";
+                var relativeThumbnailPath = $"/Uploads/{Path.GetRelativePath("Uploads", Path.GetDirectoryName(thumbnailPath)!)}/{Path.GetFileName(thumbnailPath)}";
                 picture.ThumbnailPath = relativeThumbnailPath.Replace('\\', '/');
             }
-            else if (picture.StorageType == StorageType.Telegram)
+            else
             {
-                // 对于Telegram存储，缩略图也上传到Telegram
-                await UpdatePictureStatus(task.PictureId, ProcessingStatus.Processing, 25);
-                var telegramProvider = (TelegramStorageProvider)storageProvider;
-
-                // 上传缩略图到Telegram
+                // 非本地存储，上传缩略图到对应的存储服务
                 using var thumbnailFileStream = new FileStream(thumbnailPath, FileMode.Open, FileAccess.Read);
                 var thumbnailFileName = Path.GetFileName(thumbnailPath);
-                var thumbnailContentType = "image/jpeg";
-                if (Path.GetExtension(thumbnailPath).ToLower() == ".png")
-                {
-                    thumbnailContentType = "image/png";
-                }
+                var thumbnailContentType = Path.GetExtension(thumbnailPath).ToLower() == ".png" ? "image/png" : "image/jpeg";
 
-                // 上传缩略图到Telegram并获取JSON元数据
-                string thumbnailMetadata = await telegramProvider.SaveAsync(
+                // 上传缩略图并获取存储路径或元数据
+                string thumbnailStoragePath = await storageProvider.SaveAsync(
                     thumbnailFileStream,
                     thumbnailFileName,
                     thumbnailContentType);
 
-                // 将元数据存储到ThumbnailPath
-                picture.ThumbnailPath = thumbnailMetadata;
+                // 将路径或元数据存储到ThumbnailPath
+                picture.ThumbnailPath = thumbnailStoragePath;
             }
 
             // 3. 提取EXIF信息
