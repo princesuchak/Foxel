@@ -21,14 +21,14 @@
 
 ## ✨ 核心功能
 
-| 功能模块         | 主要特性                                                                                   |
-|:---------------|:-----------------------------------------------------------------------------------------|
-| 🤖 智能图像检索   | - 基于 AI 的图像内容检索与相似度匹配<br>- 快速定位目标图片                                 |
-| 🗂️ 图像管理      | - 支持图片分类、标签管理、批量操作<br>- 多分辨率与格式化处理                                |
-| 🖼️ 图床功能      | - 图片上传、存储与分享<br>- 支持多种链接格式，访问权限灵活控制                              |
-| 👥 多用户支持     | - 用户注册、登录、权限与分组管理                                                           |
-| 💬 轻社交功能     | - 点赞、评论、分享                                                                         |
-| 🔗 第三方登录     | - 支持 GitHub、LinuxDo 等第三方账号快捷登录                                                |
+| 功能模块      | 主要特性                                |
+|:----------|:------------------------------------|
+| 🤖 智能图像检索 | - 基于 AI 的图像内容检索与相似度匹配<br>- 快速定位目标图片 |
+| 🗂️ 图像管理  | - 支持图片分类、标签管理、批量操作<br>- 多分辨率与格式化处理  |
+| 🖼️ 图床功能  | - 图片上传、存储与分享<br>- 支持多种链接格式，访问权限灵活控制 |
+| 👥 多用户支持  | - 用户注册、登录、权限与分组管理                   |
+| 💬 轻社交功能  | - 点赞、评论、分享                          |
+| 🔗 第三方登录  | - 支持 GitHub、LinuxDo 等第三方账号快捷登录      |
 
 ---
 
@@ -91,10 +91,9 @@
 
 ---
 
-
 ## 🤝 贡献指南
 
-> ⚠️ **注意：Foxel 目前处于早期实验阶段，数据库结构和各项功能仍在持续迭代中，未来版本可能会有较大变动。建议在生产环境使用前充分测试，并关注项目更新动态。**
+> ⚠️ 注意：Foxel 目前处于早期实验阶段，数据库结构和各项功能仍在持续迭代中，未来版本可能会有**较大变动**。建议在生产环境使用前充分测试，并关注项目更新动态。
 
 我们欢迎所有对 Foxel 感兴趣的开发者加入贡献，共同改进和提升这个项目。
 
@@ -107,7 +106,6 @@
 如有任何疑问或建议，欢迎通过 Issue 与我们联系。感谢您的贡献！
 
 ---
-<p>
-    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blueviolet?style=for-the-badge" alt="MIT License"></a>
-    <img src="https://img.shields.io/badge/感谢您的支持-Thanks-yellow?style=for-the-badge" alt="感谢" style="margin-left: 10px;">
-</p>
+[![Star History Chart](https://api.star-history.com/svg?repos=DrizzleTime/Foxel&type=Date)](https://www.star-history.com/#DrizzleTime/Foxel&Date)
+<a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blueviolet?style=for-the-badge" alt="MIT License"></a>
+<img src="https://img.shields.io/badge/感谢您的支持-Thanks-yellow?style=for-the-badge" alt="感谢" style="margin-left: 10px;">
