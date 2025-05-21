@@ -85,8 +85,9 @@ const SystemConfig: React.FC = () => {
   // 存储类型选项
   const storageOptions = [
     { value: 'Local', label: '本地存储', icon: <DatabaseOutlined style={{ color: '#52c41a' }} /> },
-    { value: 'Telegram', label: 'Telegram存储', icon: <CloudOutlined style={{ color: '#0088cc' }} /> },
-    { value: 'S3', label: 'S3兼容存储', icon: <CloudServerOutlined style={{ color: '#ff9900' }} /> },
+    { value: 'Telegram', label: 'Telegram 频道', icon: <CloudOutlined style={{ color: '#0088cc' }} /> },
+    { value: 'S3', label: '亚马逊 S3', icon: <CloudServerOutlined style={{ color: '#ff9900' }} /> },
+    { value: 'Cos', label: '腾讯云 COS', icon: <CloudServerOutlined style={{ color: '#00a4ff' }} /> },
   ];
 
   useEffect(() => {
@@ -288,6 +289,30 @@ const SystemConfig: React.FC = () => {
                   "S3StorageEndpoint": 'S3端点URL (可选,默认为AWS S3)',
                   "S3StorageCdnUrl": 'CDN URL (可选,用于加速文件访问)',
                   "S3StorageUsePathStyleUrls": '使用路径形式URLs (true/false,兼容非AWS服务)'
+                }}
+                isMobile={isMobile}
+              />
+            )}
+
+            {storageType === 'Cos' && (
+              <ConfigGroup
+                groupName="Storage"
+                configs={{
+                  "CosStorageSecretId": configs.Storage?.CosStorageSecretId || '',
+                  "CosStorageSecretKey": configs.Storage?.CosStorageSecretKey || '',
+                  "CosStorageToken": configs.Storage?.CosStorageToken || '',
+                  "CosStorageBucketName": configs.Storage?.CosStorageBucketName || '',
+                  "CosStorageRegion": configs.Storage?.CosStorageRegion || '',
+                  "CosStorageCdnUrl": configs.Storage?.CosStorageCdnUrl || '',
+                }}
+                onSave={handleSaveConfig}
+                descriptions={{
+                  "CosStorageSecretId": '腾讯云COS密钥ID',
+                  "CosStorageSecretKey": '腾讯云COS私有密钥',
+                  "CosStorageToken": '腾讯云COS临时令牌(可选)',
+                  "CosStorageBucketName": 'COS存储桶名称',
+                  "CosStorageRegion": 'COS区域 (例如:ap-shanghai)',
+                  "CosStorageCdnUrl": 'CDN URL (可选,用于加速文件访问)',
                 }}
                 isMobile={isMobile}
               />

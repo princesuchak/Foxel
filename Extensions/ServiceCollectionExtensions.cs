@@ -24,6 +24,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<LocalStorageProvider>();
         services.AddSingleton<TelegramStorageProvider>();
         services.AddSingleton<S3StorageProvider>();
+        services.AddSingleton<CosStorageProvider>();
         services.AddSingleton<IStorageProviderFactory, StorageProviderFactory>();
         services.AddSingleton<IDatabaseInitializer, DatabaseInitializer>();
     }

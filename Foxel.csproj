@@ -21,6 +21,7 @@
         <PackageReference Include="Pgvector.EntityFrameworkCore" Version="0.2.2" />
         <PackageReference Include="Scalar.AspNetCore" Version="2.3.1" />
         <PackageReference Include="SixLabors.ImageSharp" Version="3.1.8" />
+        <PackageReference Include="Tencent.QCloud.Cos.Sdk" Version="5.4.46" />
     </ItemGroup>
 
     <ItemGroup>
