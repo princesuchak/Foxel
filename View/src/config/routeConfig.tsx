@@ -12,7 +12,6 @@ import AllImages from '../pages/allImages/Index';
 import Albums from '../pages/albums/Index';
 import AlbumDetail from '../pages/albumDetail/Index';
 import Favorites from '../pages/favorites/Index';
-import Upload from '../pages/upload/Index';
 import Settings from '../pages/settings/Index';
 import BackgroundTasks from '../pages/backgroundTasks/Index';
 import PixHub from '../pages/pixHub/Index';
@@ -109,16 +108,6 @@ const routes: RouteConfig[] = [
     element: <Settings />,
     breadcrumb: {
       title: '设置'
-    }
-  },
-  {
-    path: 'upload',
-    key: 'upload',
-    label: '上传',
-    element: <Upload />,
-    hideInMenu: true,
-    breadcrumb: {
-      title: '上传'
     }
   },
 ];
