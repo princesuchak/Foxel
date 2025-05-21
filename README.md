@@ -5,7 +5,7 @@
 <p align="center">
     <a href="#-核心功能"><img src="https://img.shields.io/badge/核心功能-Features-blue?style=for-the-badge" alt="核心功能"></a>
     <a href="#-部署指南"><img src="https://img.shields.io/badge/部署-Deploy-orange?style=for-the-badge" alt="部署"></a>
-    <a href="#-使用方法"><img src="https://img.shields.io/badge/使用-Usage-green?style=for-the-badge" alt="使用"></a>
+    <a href="#-适配存储"><img src="https://img.shields.io/badge/存储-Storage-green?style=for-the-badge" alt="适配存储"></a>
     <a href="#-贡献指南"><img src="https://img.shields.io/badge/贡献-Contribute-brightgreen?style=for-the-badge" alt="贡献"></a>
 </p>
 
@@ -75,19 +75,16 @@
 
 ---
 
-## 📖 使用方法
+## 📖 适配存储
 
-### 🔄 匿名上传
+Foxel 提供多种存储后端选择，满足不同场景下的部署需求：
 
-1. 访问网站主页。
-2. 拖放图片到上传区域或点击选择文件。
-3. 上传完成后，系统会生成多种链接格式供分享。
+- 📁 本地存储
+- 📡 Telegram Channel
+- ☁️ Amazon S3
+- 🔐 Tencent Cloud COS
 
-### 👤 用户功能
-
-- **注册/登录**：创建账户或通过第三方登录。
-- **图片管理**：查看、编辑、删除和搜索图片。
-- **批量操作**：支持批量上传和管理。
+未来将持续适配更多主流云存储平台，欢迎社区贡献新的存储适配器！
 
 ---
 
@@ -106,6 +103,11 @@
 如有任何疑问或建议，欢迎通过 Issue 与我们联系。感谢您的贡献！
 
 ---
+
+<p align="center">
+    <img src="https://img.shields.io/badge/License-MIT-blueviolet?style=for-the-badge" alt="MIT License" style="display:inline-block; vertical-align:middle;">
+    <span style="display:inline-block; width:20px;"></span>
+    <img src="https://img.shields.io/badge/感谢您的支持-Thanks-yellow?style=for-the-badge" alt="感谢" style="display:inline-block; vertical-align:middle;">
+</p>
+
 [![Star History Chart](https://api.star-history.com/svg?repos=DrizzleTime/Foxel&type=Date)](https://www.star-history.com/#DrizzleTime/Foxel&Date)
-<a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blueviolet?style=for-the-badge" alt="MIT License"></a>
-<img src="https://img.shields.io/badge/感谢您的支持-Thanks-yellow?style=for-the-badge" alt="感谢" style="margin-left: 10px;">
